@@ -1,8 +1,22 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import CloseIcon from "@mui/icons-material/Close";
+import InfoIcon from "@mui/icons-material/Info";
 import { useLocation } from "react-router-dom";
-import { Container, TextField, Button, Typography, Paper, Dialog, DialogTitle, DialogContent, IconButton, Box, Grid } from "@mui/material";
+import { 
+  Container, 
+  TextField, 
+  Button, 
+  Typography, 
+  Paper, 
+  Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  IconButton, 
+  Box, 
+  Grid,
+  Tooltip
+} from "@mui/material";
 
 const UploadSalary = () => {
   const [employeeId, setEmployeeId] = useState("");
@@ -185,6 +199,13 @@ const UploadSalary = () => {
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
             margin="normal"
+            InputProps={{
+              endAdornment: (
+                <Tooltip title="Enter the employee's ID to fetch their details" placement="top">
+                  <InfoIcon fontSize="small" sx={{ color: "#AAAAAA" }} />
+                </Tooltip>
+              ),
+            }}
           />
           <Box display="flex" justifyContent="center" mt={3} gap={2}>
             <Button variant="contained" color="primary" onClick={fetchEmployeeDetails}>
@@ -218,19 +239,90 @@ const UploadSalary = () => {
                   <TextField fullWidth label="City" variant="outlined" value={employeeDetails.city} InputProps={{ readOnly: true }} />
                 </Grid>
                 <Grid item xs={6}>
-                  <TextField fullWidth label="PF Number" variant="outlined" value={pfno} onChange={(e) => setPfno(e.target.value)} required />
+                  <TextField 
+                    fullWidth 
+                    label="PF Number" 
+                    variant="outlined" 
+                    value={pfno} 
+                    onChange={(e) => setPfno(e.target.value)} 
+                    required 
+                    InputProps={{
+                      endAdornment: (
+                        <Tooltip title="Enter Provident Fund number of the employee" placement="top">
+                          <InfoIcon fontSize="small" sx={{ color: "#AAAAAA" }} />
+                        </Tooltip>
+                      ),
+                    }}
+                  />
                 </Grid>
                 <Grid item xs={6}>
-                  <TextField fullWidth label="UAN" variant="outlined" value={uan} onChange={(e) => setUan(e.target.value)} required />
+                  <TextField 
+                    fullWidth 
+                    label="UAN" 
+                    variant="outlined" 
+                    value={uan} 
+                    onChange={(e) => setUan(e.target.value)} 
+                    required 
+                    InputProps={{
+                      endAdornment: (
+                        <Tooltip title="Enter Universal Account Number of the employee" placement="top">
+                          <InfoIcon fontSize="small" sx={{ color: "#AAAAAA" }} />
+                        </Tooltip>
+                      ),
+                    }}
+                  />
                 </Grid>
                 <Grid item xs={12}>
-                  <TextField fullWidth label="Enter CTC" variant="outlined" type="number" value={ctc} onChange={handleCtcChange} required />
+                  <TextField 
+                    fullWidth 
+                    label="Enter CTC" 
+                    variant="outlined" 
+                    type="number" 
+                    value={ctc} 
+                    onChange={handleCtcChange} 
+                    required 
+                    InputProps={{
+                      endAdornment: (
+                        <Tooltip title="Enter the annual Cost to Company in INR. This will be used to calculate all salary components." placement="top">
+                          <InfoIcon fontSize="small" sx={{ color: "#AAAAAA" }} />
+                        </Tooltip>
+                      ),
+                    }}
+                  />
                 </Grid>
                 <Grid item xs={6}>
-                  <TextField fullWidth label="Joining Bonus" variant="outlined" type="number" value={joiningBonus} onChange={handleJoiningBonusChange} />
+                  <TextField 
+                    fullWidth 
+                    label="Joining Bonus" 
+                    variant="outlined" 
+                    type="number" 
+                    value={joiningBonus} 
+                    onChange={handleJoiningBonusChange} 
+                    InputProps={{
+                      endAdornment: (
+                        <Tooltip title="Enter one-time joining bonus amount, if applicable" placement="top">
+                          <InfoIcon fontSize="small" sx={{ color: "#AAAAAA" }} />
+                        </Tooltip>
+                      ),
+                    }}
+                  />
                 </Grid>
                 <Grid item xs={6}>
-                  <TextField fullWidth label="Variable Salary" variant="outlined" type="number" value={variableSalary} onChange={handleVariableSalaryChange} />
+                  <TextField 
+                    fullWidth 
+                    label="Variable Salary" 
+                    variant="outlined" 
+                    type="number" 
+                    value={variableSalary} 
+                    onChange={handleVariableSalaryChange} 
+                    InputProps={{
+                      endAdornment: (
+                        <Tooltip title="Enter the annual variable pay component of the salary" placement="top">
+                          <InfoIcon fontSize="small" sx={{ color: "#AAAAAA" }} />
+                        </Tooltip>
+                      ),
+                    }}
+                  />
                 </Grid>
               </Grid>
             </>
@@ -238,7 +330,12 @@ const UploadSalary = () => {
 
           {salaryDetails && (
             <Paper sx={{ mt: 3, p: 2, backgroundColor: "#e3f2fd" }}>
-              <Typography variant="h6">Salary Breakdown</Typography>
+              <Typography variant="h6">
+                Salary Breakdown
+                <Tooltip title="Calculated breakdown of salary components based on the entered CTC" placement="top">
+                  <InfoIcon fontSize="small" sx={{ ml: 1, color: "#AAAAAA" }} />
+                </Tooltip>
+              </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <Typography><strong>Base Salary:</strong> ₹{salaryDetails.base_salary.toFixed(2)}</Typography>
@@ -274,15 +371,26 @@ const UploadSalary = () => {
                     <Typography><strong>Variable Salary:</strong> ₹{salaryDetails.variable_salary.toFixed(2)}</Typography>
                   </Grid>
                 )}
+                <Grid item xs={12}>
+                  <Typography><strong>Taxable Income:</strong> ₹{salaryDetails.taxable_income.toFixed(2)}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography><strong>Total Tax:</strong> ₹{salaryDetails.total_tax.toFixed(2)}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography><strong>Monthly Tax:</strong> ₹{salaryDetails.monthly_tax.toFixed(2)}</Typography>
+                </Grid>
               </Grid>
             </Paper>
           )}
 
           {salaryDetails && (
             <Box textAlign="center">
-              <Button variant="contained" color="primary" sx={{ mt: 3 }} onClick={submitPayroll}>
-                Submit Payroll
-              </Button>
+              <Tooltip title="Submit this payroll information to the system" placement="top">
+                <Button variant="contained" color="primary" sx={{ mt: 3 }} onClick={submitPayroll}>
+                  Submit Payroll
+                </Button>
+              </Tooltip>
             </Box>
           )}
         </Paper>

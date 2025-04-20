@@ -263,6 +263,23 @@ const OfferForm = () => {
   
   const handleCloseAlert = () => setAlert(prev => ({ ...prev, open: false }));
 
+  // Helper function to create tooltip text field
+  const TooltipTextField = ({ label, name, value, onChange, error, helperText, tooltipText, required = false, ...props }) => (
+    <Tooltip title={tooltipText} arrow placement="top-start">
+      <TextField
+        fullWidth
+        label={label}
+        name={name}
+        value={value || ''}
+        onChange={onChange}
+        error={!!error}
+        helperText={helperText}
+        required={required}
+        {...props}
+      />
+    </Tooltip>
+  );
+
   return (
     <Box sx={{ maxWidth: 1500, mx: 'auto', p: 2 }}>
       <Typography variant="h4" gutterBottom align="center" fontWeight="bold">
@@ -324,173 +341,177 @@ const OfferForm = () => {
               <Grid item xs={12}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
+                    <TooltipTextField
                       label="Candidate Email"
                       name="candidateEmail"
-                      value={offer.candidateEmail || ''}
+                      value={offer.candidateEmail}
                       onChange={handleChange}
-                      error={!!errors.candidateEmail}
+                      error={errors.candidateEmail}
                       helperText={errors.candidateEmail}
                       InputProps={{ readOnly: !!selectedCandidate }}
                       variant="outlined"
                       InputLabelProps={{ shrink: true }}
                       required
+                      
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
+                    <TooltipTextField
                       label="Candidate Name"
                       name="candidateName"
-                      value={offer.candidateName || ''}
+                      value={offer.candidateName}
                       onChange={handleChange}
-                      error={!!errors.candidateName}
+                      error={errors.candidateName}
                       helperText={errors.candidateName}
                       InputProps={{ readOnly: !!selectedCandidate }}
                       required
+                    
                     />
                   </Grid>
                 </Grid>
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
+                <TooltipTextField
                   label="Hiring Manager Email"
                   name="hiringManagerEmail"
-                  value={offer.hiringManagerEmail || ''}
+                  value={offer.hiringManagerEmail}
                   onChange={handleChange}
-                  error={!!errors.hiringManagerEmail}
+                  error={errors.hiringManagerEmail}
                   helperText={errors.hiringManagerEmail}
                   required
+                
                 />
               </Grid>
               <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
+                <TooltipTextField
                   label="Job Title"
                   name="jobTitle"
-                  value={offer.jobTitle || ''}
+                  value={offer.jobTitle}
                   onChange={handleChange}
-                  error={!!errors.jobTitle}
+                  error={errors.jobTitle}
                   helperText={errors.jobTitle}
                   required
+                 
                 />
               </Grid>
               <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
+                <TooltipTextField
                   label="Notice Period"
                   name="noticePeriod"
-                  value={offer.noticePeriod || ''}
+                  value={offer.noticePeriod}
                   onChange={handleChange}
+                  tooltipText="Expected notice period in current company (e.g., 30 days, 2 months)"
                 />
               </Grid>
               
               <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
+                <TooltipTextField
                   label="Offer Date"
                   name="offerDate"
                   type="date"
-                  value={offer.offerDate || ''}
+                  value={offer.offerDate}
                   onChange={handleChange}
-                  error={!!errors.offerDate}
+                  error={errors.offerDate}
                   helperText={errors.offerDate}
                   InputLabelProps={{ shrink: true }}
                   required
+                  tooltipText="Date when offer is issued to candidate"
                 />
               </Grid>
               
               <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
+                <TooltipTextField
                   label="Fixed Salary (Annual)"
                   name="salaryFixed"
-                  value={offer.salaryFixed || ''}
+                  value={offer.salaryFixed}
                   onChange={handleChange}
-                  error={!!errors.salaryFixed}
+                  error={errors.salaryFixed}
                   helperText={errors.salaryFixed}
                   required
+                  tooltipText="Base annual compensation amount without variable components"
                 />
               </Grid>
               
               <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
+                <TooltipTextField
                   label="Variable Salary (Annual)"
                   name="salaryVariable"
-                  value={offer.salaryVariable || ''}
+                  value={offer.salaryVariable}
                   onChange={handleChange}
-                  error={!!errors.salaryVariable}
+                  error={errors.salaryVariable}
                   helperText={errors.salaryVariable}
+                  tooltipText="Performance-based or bonus compensation component (annual)"
                 />
               </Grid>
               
               <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
+                <TooltipTextField
                   label="Joining Bonus"
                   name="joiningBonus"
-                  value={offer.joiningBonus || ''}
+                  value={offer.joiningBonus}
                   onChange={handleChange}
-                  error={!!errors.joiningBonus}
+                  error={errors.joiningBonus}
                   helperText={errors.joiningBonus}
+                  tooltipText="One-time bonus paid upon joining the company"
                 />
               </Grid>
               
               <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
+                <TooltipTextField
                   label="ESOP"
                   name="esop"
-                  value={offer.esop || ''}
+                  value={offer.esop}
                   onChange={handleChange}
+                  tooltipText="Employee Stock Option Plan details (number of shares or value)"
                 />
               </Grid>
               
               <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
+                <TooltipTextField
                   label="Joining Date"
                   name="joiningDate"
                   type="date"
-                  value={offer.joiningDate || ''}
+                  value={offer.joiningDate}
                   onChange={handleChange}
-                  error={!!errors.joiningDate}
+                  error={errors.joiningDate}
                   helperText={errors.joiningDate}
                   InputLabelProps={{ shrink: true }}
                   required
+                  tooltipText="Expected first day of employment"
                 />
               </Grid>
               
               <Grid item xs={12} md={6}>
-                <Button
-                  component="label"
-                   variant="outlined"
-                  startIcon={<CloudUploadIcon />}
-                  fullWidth
-                  color={errors.offerLetter ? "error" : "primary"}
-                  sx={{maxWidth:"300px",marginLeft:"70px",marginTop:"10px"}}
-                >
-                  Upload Offer Letter
-                  <VisuallyHiddenInput 
-                    type="file" 
-                    accept=".pdf,.doc,.docx"
-                    onChange={handleFileUpload}
-                  />
-                </Button>
-                {offerLetter && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    {offerLetter.name}
-                  </Typography>
-                )}
-                {errors.offerLetter && (
-                  <Typography color="error" variant="caption">
-                    {errors.offerLetter}
-                  </Typography>
-                )}
+                <Tooltip title="Upload official offer letter document (PDF or Word, max 5MB)">
+                  <Box>
+                    <Button
+                      component="label"
+                      variant="outlined"
+                      startIcon={<CloudUploadIcon />}
+                      fullWidth
+                      color={errors.offerLetter ? "error" : "primary"}
+                      sx={{maxWidth:"300px",marginLeft:"70px",marginTop:"10px"}}
+                    >
+                      Upload Offer Letter
+                      <VisuallyHiddenInput 
+                        type="file" 
+                        accept=".pdf,.doc,.docx"
+                        onChange={handleFileUpload}
+                      />
+                    </Button>
+                    {offerLetter && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        {offerLetter.name}
+                      </Typography>
+                    )}
+                    {errors.offerLetter && (
+                      <Typography color="error" variant="caption">
+                        {errors.offerLetter}
+                      </Typography>
+                    )}
+                  </Box>
+                </Tooltip>
               </Grid>
               
               <Grid item xs={12}>
@@ -526,6 +547,3 @@ const OfferForm = () => {
 };
 
 export default OfferForm;
-
-
-

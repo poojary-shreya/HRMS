@@ -1,599 +1,270 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useForm, Controller } from "react-hook-form";
 import {
-  Container, Card, CardContent, Typography, TextField, Button, Grid, Box,
-  Paper, Checkbox, FormControlLabel, Divider, Chip, LinearProgress,
-  List, ListItem, ListItemText, ListItemIcon, Alert, CircularProgress
-} from '@mui/material';
-import {
-  CheckCircle, Assignment, EventNote, Update, PlayArrow, 
-  CheckBox, CheckBoxOutlineBlank, Person, Email, Badge
-} from '@mui/icons-material';
-
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-
-
-const AuthContext = createContext();
-
-
-export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Grid,
+  Box,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TableContainer,
+  Paper,
+  CircularProgress,
+  Tooltip,
+  ListItemText
+} from "@mui/material";
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+const EmployeeUploadDoc = () => {
+  const { register, handleSubmit, reset, setValue, control } = useForm();
+  const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
+  const [employeeId, setEmployeeId] = useState("");
 
+  const categoryTooltips = {
+    hra: "House Rent Allowance - Tax exemption on rent paid for residential accommodation",
+    medical_allowance: "Reimbursement for medical expenses incurred by employee",
+    newspaper_allowance: "Reimbursement for newspaper subscriptions",
+    dress_allowance: "Allowance for formal or work-related clothing expenses",
+    other_allowance: "Any allowance not covered in the standard categories",
+    section80C_investment: "Deduction up to ₹1.5 lakh for specified investments like PPF, life insurance premiums",
+    section80CCC_investment: "Deduction for payments towards pension plans",
+    section80D: "Deduction for health insurance premiums paid for self, family, and parents",
+    section80CCD_1B: "Additional deduction up to ₹50,000 for contribution to NPS",
+    section80CCD_2: "Employer's contribution to NPS (up to 10% of salary)",
+    section24_b: "Interest on housing loan for self-occupied property (up to ₹2 lakh)",
+    section80E: "Deduction for interest paid on education loan",
+    section80EEB: "Deduction for interest on loan for electric vehicle purchase (up to ₹1.5 lakh)",
+    otherInvestment: "Any investment not covered under standard tax-saving sections"
+  };
+
+  // Fetch employee ID and documents on component mount
   useEffect(() => {
-    const checkLoggedIn = async () => {
-      try {
-   
-        const userData = localStorage.getItem('user');
+    // Get employee ID from session
+    axios
+      .get("http://localhost:5000/api/user/current", { withCredentials: true })
+      .then((response) => {
+        const id = response.data.employee_id;
+        setEmployeeId(id);
+        setValue("employee_id", id); // Set the form value
         
-        if (userData) {
-          const user = JSON.parse(userData);
-          
-  
-          const { data } = await axios.get(`${API_BASE_URL}/auth/verify-token`, {
-            headers: {
-              Authorization: `Bearer ${user.token}`
-            }
-          });
-          
-          if (data.valid) {
-           
-            axios.defaults.headers.common['Authorization'] = `Bearer ${user.token}`;
-            setCurrentUser(user);
-          } else {
-           
-            logout();
-          }
+        // Then fetch documents
+        fetchEmployeeDocuments();
+      })
+      .catch((error) => {
+        console.error("Error fetching session data:", error);
+        setLoading(false);
+      });
+  }, [setValue]);
+
+  // Function to fetch employee documents
+  const fetchEmployeeDocuments = () => {
+    setLoading(true);
+    axios
+      .get("http://localhost:5000/api/employee/status/documents", { withCredentials: true })
+      .then((response) => {
+        setDocuments(response.data);
+        console.log("Employee documents:", response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching documents:", error);
+        setLoading(false);
+      });
+  };
+
+  const onSubmit = async (data) => {
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      // No need to append employee_id as it will come from the session
+      formData.append("document_name", data.document_name);
+      formData.append("category", data.category);
+      formData.append("amount", data.amount);
+      formData.append("files", data.files[0]);
+
+      const response = await axios.post(
+        "http://localhost:5000/api/employee/upload-documents",
+        formData,
+        { 
+          headers: { "Content-Type": "multipart/form-data" },
+          withCredentials: true // Include cookies/session
         }
-      } catch (err) {
-        console.error("Auth verification error:", err);
-  
-        logout();
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    checkLoggedIn();
-  }, []);
-  
+      );
 
-  const login = async (email, password) => {
-    try {
-      setError(null);
-      
-      const { data } = await axios.post(`${API_BASE_URL}/auth/login`, { 
-        email, 
-        password 
-      });
-      
-    
-      localStorage.setItem('user', JSON.stringify(data));
-      
-  
-      axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
-      
-      setCurrentUser(data);
-      return data;
-    } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
-      throw err;
-    }
-  };
-  
-  const logout = () => {
-    localStorage.removeItem('user');
-    
-
-    delete axios.defaults.headers.common['Authorization'];
-  
-    setCurrentUser(null);
-  };
-
-  const register = async (userData) => {
-    try {
-      setError(null);
-      
-      const { data } = await axios.post(`${API_BASE_URL}/auth/register`, userData);
-      return data;
-    } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
-      throw err;
-    }
-  };
-  
-  return (
-    <AuthContext.Provider value={{ 
-      currentUser, 
-      loading, 
-      error, 
-      login, 
-      logout, 
-      register 
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-function EmployeeTrainingView() {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const { currentUser } = useContext(AuthContext); 
-  
-  const [training, setTraining] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [updating, setUpdating] = useState(false);
-  
-
-  const [progress, setProgress] = useState(0);
-  const [statusUpdate, setStatusUpdate] = useState("");
-  const [taskCompleted, setTaskCompleted] = useState([]);
-  
-  useEffect(() => {
-    fetchTrainingDetails();
-  }, [id]);
-  
-  const fetchTrainingDetails = async () => {
-    try {
-      setLoading(true);
-      setError("");
-   
-      if (!id || id === 'undefined') {
-        setError("Invalid training ID. Please select a valid training.");
-        setLoading(false);
-        return;
-      }
-      
-
-      console.log(`Fetching training with ID: ${id}`);
-      
-    
-      const token = currentUser?.token;
-      const headers = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-      
-  
-      const params = {};
-      if (currentUser?.email) {
-        params.email = currentUser.email;
-      }
-      
-    
-      const { data } = await axios.get(`${API_BASE_URL}/trainings/employee/${id}`, {
-        headers,
-        params
-      });
-      
-      if (!data) {
-        throw new Error("No data received from server");
-      }
-      
-      console.log("Training data received:", data);
-      setTraining(data);
-      
-  
-      if (data.progressUpdates && data.progressUpdates.length > 0) {
-        setProgress(data.progressPercentage || 0);
+      if (response.status === 200 || response.status === 201) {
+        alert("File uploaded successfully!");
         
-        if (data.completedTasks && Array.isArray(data.completedTasks)) {
-          setTaskCompleted(data.completedTasks);
-        } else {
-         
-          const defaultTasks = generateDefaultTasks(data.skillContent || "training");
-          setTaskCompleted(defaultTasks);
-        }
-      } else {
-    
-        const defaultTasks = generateDefaultTasks(data.skillContent || "training");
-        setTaskCompleted(defaultTasks);
+        // Reset form but keep employee_id
+        reset({
+          employee_id: employeeId
+        });
+        
+        // Refresh the documents list
+        fetchEmployeeDocuments();
       }
     } catch (error) {
-      console.error("Error fetching training details:", error);
-      
-   
-      let errorMsg = "Failed to load training details";
-      
-      if (error.response) {
-      
-        errorMsg = error.response.data?.message || error.response.statusText;
-        console.error("Error response data:", error.response.data);
-        console.error("Error response status:", error.response.status);
-        
-     
-        if (error.response.status === 404) {
-          errorMsg = "Training not found. It may have been deleted or you don't have access.";
-        }
-     
-        else if (error.response.status === 403) {
-          errorMsg = "You don't have permission to view this training.";
-        }
-      } else if (error.request) {
-       
-        errorMsg = "No response received from server. Please check your connection.";
+      if (error.response && error.response.status === 403) {
+        alert(error.response.data.message); 
       } else {
-     
-        errorMsg = error.message;
+        console.error("Error uploading file:", error);
+        alert("Upload failed! Please try again.");
       }
-      
-      setError(errorMsg);
-    } finally {
       setLoading(false);
     }
   };
-  
-  
-  const generateDefaultTasks = (skillContent) => {
-   
-    return [
-      { id: 1, task: `Introduction to ${skillContent}`, completed: false },
-      { id: 2, task: `Core concepts of ${skillContent}`, completed: false },
-      { id: 3, task: `Practical application of ${skillContent}`, completed: false },
-      { id: 4, task: `${skillContent} assessment`, completed: false }
-    ];
-  };
-  
-  useEffect(() => {
-    if (success || error) {
-      const timer = setTimeout(() => {
-        setSuccess("");
-        setError("");
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [success, error]);
-  
-  const handleTaskToggle = (taskId) => {
-    const updatedTasks = taskCompleted.map(task => 
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    );
-    setTaskCompleted(updatedTasks);
-    
-   
-    const completedCount = updatedTasks.filter(task => task.completed).length;
-    const newProgress = Math.round((completedCount / updatedTasks.length) * 100);
-    setProgress(newProgress);
-  };
-  
-  const updateTrainingProgress = async () => {
-    if (!statusUpdate.trim()) {
-      setError("Please add a status update before submitting");
-      return;
-    }
-    
-    try {
-      setUpdating(true);
-      
-      const progressUpdate = {
-        date: new Date().toISOString(),
-        statusUpdate,
-        progressPercentage: progress,
-        completedTasks: taskCompleted
-      };
-      
-  
-      const employeeEmail = training.email;
-      const employeeName = training.employee;
-      const employeeId = training.employeeId;
-      
-  
-      const headers = {};
-      if (currentUser?.token) {
-        headers['Authorization'] = `Bearer ${currentUser.token}`;
-      }
-      
-    
-      const response = await axios.put(`${API_BASE_URL}/trainings/${id}/progress`, {
-        progressUpdates: [...(training.progressUpdates || []), progressUpdate],
-        progressPercentage: progress,
-        completedTasks: taskCompleted,
-      
-        status: progress === 100 ? 'Completed' : 'In Progress',
-       
-        lastUpdated: new Date().toISOString(),
-        lastUpdatedBy: employeeName,
-        employeeEmail,
-        employeeId
-      }, { headers });
-      
-      setTraining(response.data);
-      setStatusUpdate("");
-      setSuccess("Progress updated successfully! HR has been notified of your update.");
-      
-      
-      await axios.post(`${API_BASE_URL}/trainings/notify`, {
-        trainingId: id,
-        employeeEmail,
-        employeeName,
-        employeeId,
-        updateType: 'progress',
-        progressPercentage: progress,
-        status: progress === 100 ? 'Completed' : 'In Progress'
-      }, { headers });
-      
-    } catch (error) {
-      console.error("Error updating progress:", error);
-      setError(error.response?.data?.message || "Failed to update progress");
-    } finally {
-      setUpdating(false);
-    }
-  };
-  
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'Completed': return 'success';
-      case 'In Progress': return 'primary';
-      case 'Planned': return 'warning';
-      case 'Cancelled': return 'error';
-      default: return 'default';
-    }
-  };
-  
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleString();
-  };
-  
-  if (loading) {
-    return (
-      <Container sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
-        <CircularProgress />
-      </Container>
-    );
-  }
-  
-  if (error) {
-    return (
-      <Container>
-        <Alert severity="error" sx={{ mt: 3, mb: 2 }}>
-          {error}
-        </Alert>
-        <Button onClick={() => navigate('/employee/trainings')} sx={{ mt: 2 }}>
-          Back to Trainings
-        </Button>
-      </Container>
-    );
-  }
-  
-  if (!training) {
-    return (
-      <Container>
-        <Alert severity="error" sx={{ mt: 3, mb: 2 }}>
-          Training not found
-        </Alert>
-        <Button onClick={() => navigate('/employee/trainings')} sx={{ mt: 2 }}>
-          Back to Trainings
-        </Button>
-      </Container>
-    );
-  }
-  
+
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      {success && (
-        <Alert 
-          severity="success" 
-          sx={{ mb: 2 }}
-        >
-          {success}
-        </Alert>
-      )}
-      
-      <Card sx={{ mb: 4, boxShadow: 3 }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h4" gutterBottom>
-              {training.title}
-            </Typography>
-            <Chip 
-              label={training.status} 
-              color={getStatusColor(training.status)} 
-              icon={<PlayArrow />}
+    <Container maxWidth="1500px" sx={{ maxWidth: 1500, mt: 3, boxShadow: 3,}}>
+      <Typography variant="h4" gutterBottom textAlign="center" sx={{marginTop:"40px"}} fontWeight="bold">
+        Employee Financial Document Upload
+      </Typography>
+    
+      <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ marginBottom: "30px", width: "100%" }}>
+        <Grid container spacing={2} sx={{ width: "100%", margin: 0 }}>
+          {/* Read-only Employee ID field */}
+          <Grid item xs={12} sm={6}>
+            <TextField 
+              fullWidth 
+              label="Employee ID" 
+              {...register("employee_id")} 
+              variant="outlined" 
+              InputProps={{
+                readOnly: true,
+              }}
+              sx={{ "& .MuiInputBase-input.Mui-disabled": { 
+                WebkitTextFillColor: "#000", 
+                opacity: 0.8 
+              } }}
             />
-          </Box>
-          
-          <Divider sx={{ mb: 3 }} />
-          
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 2, height: '100%' }}>
-                <Typography variant="h6" gutterBottom>
-                  Training Information
-                </Typography>
-                
-                <List>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Person />
-                    </ListItemIcon>
-                    <ListItemText 
-                      primary="Employee" 
-                      secondary={training.employee} 
-                    />
-                  </ListItem>
-                  
-                  <ListItem>
-                    <ListItemIcon>
-                      <Badge />
-                    </ListItemIcon>
-                    <ListItemText 
-                      primary="Employee ID" 
-                      secondary={training.employeeId || 'Not assigned'} 
-                    />
-                  </ListItem>
-                  
-                  <ListItem>
-                    <ListItemIcon>
-                      <Email />
-                    </ListItemIcon>
-                    <ListItemText 
-                      primary="Email" 
-                      secondary={training.email} 
-                    />
-                  </ListItem>
-                  
-                  <ListItem>
-                    <ListItemIcon>
-                      <Assignment />
-                    </ListItemIcon>
-                    <ListItemText 
-                      primary="Skill Category" 
-                      secondary={training.skillCategory} 
-                    />
-                  </ListItem>
-                  
-                  <ListItem>
-                    <ListItemIcon>
-                      <Assignment />
-                    </ListItemIcon>
-                    <ListItemText 
-                      primary="Skill Content" 
-                      secondary={training.skillContent} 
-                    />
-                  </ListItem>
-                  
-                  <ListItem>
-                    <ListItemIcon>
-                      <EventNote />
-                    </ListItemIcon>
-                    <ListItemText 
-                      primary="Duration" 
-                      secondary={`${new Date(training.startDate).toLocaleDateString()} - ${new Date(training.endDate).toLocaleDateString()}`} 
-                    />
-                  </ListItem>
-                </List>
-              </Paper>
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 2, height: '100%' }}>
-                <Typography variant="h6" gutterBottom>
-                  Progress Tracker
-                </Typography>
-                
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Box sx={{ width: '100%', mr: 1 }}>
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={progress} 
-                      sx={{ height: 10, borderRadius: 5 }} 
-                    />
-                  </Box>
-                  <Typography variant="body2" color="text.secondary">{`${progress}%`}</Typography>
-                </Box>
-                
-                <Typography variant="subtitle1" sx={{ mt: 3, mb: 1 }}>
-                  Task Completion
-                </Typography>
-                
-                {taskCompleted.map((task) => (
-                  <FormControlLabel
-                    key={task.id}
-                    control={
-                      <Checkbox
-                        checked={task.completed}
-                        onChange={() => handleTaskToggle(task.id)}
-                        icon={<CheckBoxOutlineBlank />}
-                        checkedIcon={<CheckBox />}
-                      />
-                    }
-                    label={task.task}
-                  />
-                ))}
-              </Paper>
-            </Grid>
           </Grid>
-        </CardContent>
-      </Card>
-      
-      <Card sx={{ mb: 4, boxShadow: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Update Progress
-          </Typography>
-          
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            variant="outlined"
-            label="Status Update"
-            placeholder="Describe what you've learned and your progress..."
-            value={statusUpdate}
-            onChange={(e) => setStatusUpdate(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-          
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={updateTrainingProgress}
-            disabled={updating}
-            startIcon={<Update />}
-          >
-            {updating ? 'Updating...' : 'Submit Update'}
-          </Button>
-        </CardContent>
-      </Card>
-      
-      <Card sx={{ boxShadow: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Progress History
-          </Typography>
-          
-          {(!training.progressUpdates || training.progressUpdates.length === 0) ? (
-            <Typography variant="body2" color="text.secondary">
-              No progress updates yet. Be the first to add an update!
-            </Typography>
-          ) : (
-            <List>
-              {training.progressUpdates.map((update, index) => (
-                <React.Fragment key={index}>
-                  <ListItem alignItems="flex-start">
-                    <ListItemIcon>
-                      <CheckCircle color="primary" />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="subtitle1">
-                            Progress Update: {update.progressPercentage}%
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {formatDate(update.date)}
-                          </Typography>
-                        </Box>
-                      }
-                      secondary={update.statusUpdate}
-                    />
-                  </ListItem>
-                  {index < training.progressUpdates.length - 1 && <Divider variant="inset" component="li" />}
-                </React.Fragment>
-              ))}
-            </List>
-          )}
-        </CardContent>
-      </Card>
+          <Grid item xs={12} sm={6}>
+            <TextField fullWidth label="Document Name" {...register("document_name", { required: true })} variant="outlined" />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField fullWidth label="Claiming Amount" {...register("amount", { required: true })} variant="outlined" />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth variant="outlined">
+              <InputLabel>Category</InputLabel>
+              <Controller
+                name="category"
+                control={control}
+                defaultValue=""
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Select {...field} label="Category">
+                    {Object.entries(categoryTooltips).map(([value, tooltipText]) => {
+                      // Convert value to a readable label
+                      const label = value
+                        .replace(/_/g, ' ')
+                        .split(' ')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ')
+                        .replace(/section/i, 'Section ');
+                        
+                      return (
+                        <MenuItem key={value} value={value}>
+                          <Box display="flex" alignItems="center">
+                            <ListItemText primary={label} />
+                            <Tooltip 
+                              title={tooltipText} 
+                              placement="right" 
+                              arrow
+                            >
+                              <InfoOutlinedIcon 
+                                fontSize="small" 
+                                sx={{ ml: 1, color: 'grey.500' }} 
+                              />
+                            </Tooltip>
+                          </Box>
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                )}
+              />
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField fullWidth type="file" {...register("files", { required: true })} variant="outlined" inputProps={{ accept: ".pdf,.jpg,.png,.docx" }} />
+          </Grid>
+          <Grid item xs={12} sm={6} display="flex">
+            <Button variant="contained" color="primary" type="submit" sx={{width:"150px",height:"50px"}} >
+              Upload
+            </Button>
+          </Grid>
+        </Grid>
+      </Box>
+    
+      <Typography variant="h5" gutterBottom>
+        My Uploaded Documents
+      </Typography>
+    
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" height="300px">
+          <CircularProgress />
+        </Box>
+      ) : (
+        <TableContainer component={Paper} sx={{ width: "100%" }}>
+          <Table sx={{ minWidth: 650 }} aria-label="uploaded documents table">
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: "bold" }}>Document Name</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Category</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Amount Claimed</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Claim Approved</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Remaining Taxable Income</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>File</TableCell>
+                <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {Array.isArray(documents) && documents.length > 0 ? (
+                documents.map((doc, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{doc.document_name}</TableCell>
+                    <TableCell>
+                      <Box display="flex" alignItems="center">
+                        {doc.category}
+                        {/* {categoryTooltips[doc.category] && (
+                          <Tooltip title={categoryTooltips[doc.category]} placement="right" arrow>
+                            <InfoOutlinedIcon fontSize="small" sx={{ ml: 1, color: 'grey.500' }} />
+                          </Tooltip>
+                        )} */}
+                      </Box>
+                    </TableCell>
+                    <TableCell>{doc.amount}</TableCell>
+                    <TableCell>{doc.claimed_amount}</TableCell>
+                    <TableCell>{doc.rem_taxable_income}</TableCell>
+                    <TableCell>
+                      <a href={`http://localhost:5000/uploads/${doc.file_path}`} target="_blank" rel="noopener noreferrer">
+                        View File
+                      </a>
+                    </TableCell>
+                    <TableCell>{doc.status || "Pending"}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">No documents found</TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </Container>
   );
-}
+};
 
-
-function EmployeeTrainingViewWithAuth() {
-  return (
-    <AuthProvider>
-      <EmployeeTrainingView />
-    </AuthProvider>
-  );
-}
-
-export default EmployeeTrainingViewWithAuth;
+export default EmployeeUploadDoc;

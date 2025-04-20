@@ -17,7 +17,7 @@ import offerRoutes from "./routes/offerRoutes.js";
 import onboardingRoutes from './routes/onboardingRoutes.js';
 import documentRoutes from './routes/docroutes.js';
 import searchRoutes from './routes/searchRoutes.js';
-
+import employeeRoutes from './routes/employeeprofileRoutes.js';
 
 import bonafideRoutes from "./routes/bonafiedRoutes.js";
 import advanceSalaryRoutes from "./routes/advancesalary.js";
@@ -75,7 +75,7 @@ app.use("/api/interviews", interviewRoutes);
 app.use("/api/offers", offerRoutes);
 app.use('/api/onboarding', onboardingRoutes);
 app.use('/api/documents', documentRoutes);
-
+app.use('/api', employeeRoutes);
 app.use("/api/bonafide", bonafideRoutes);
 app.use("/api/salary-request", advanceSalaryRoutes);
 app.use("/api/leaves", leaveRoutes);

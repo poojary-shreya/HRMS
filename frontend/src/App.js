@@ -71,6 +71,7 @@ import FormPartB from "./components/FormPartB.jsx";
 import Form16 from "./components/form16.jsx";
 import ManualAttendance from "./components/ManualAttendance.jsx";
 import HRTestManagement from "./components/addtest.jsx";
+import EmployeeProfile from "./components/employeeprofile.jsx";
 const theme = createTheme({
   palette: {
     primary: { main: "#1976d2" },
@@ -137,6 +138,7 @@ const App = () => {
           <Route path="/navbar" element={<SharedNavbar />} />
           <Route path="/attendance" element={<Attendance />} />
           <Route path="/updatetraining" element={<EmployeeTrainingView />} />
+          <Route path="/employee" element={<EmployeeProfile />} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={["hr", "manager",]} />}>

@@ -18,9 +18,12 @@ import {
   IconButton,
   Snackbar,
   Alert,
-  CircularProgress
+  CircularProgress,
+  Tooltip
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import InfoIcon from "@mui/icons-material/Info";
 
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000/api";
@@ -209,7 +212,13 @@ const OnboardingForm = () => {
                     fullWidth
                     required
                     margin="normal"
-                  
+                    InputProps={{
+                      endAdornment: (
+                        <Tooltip title="Enter the unique ID assigned to the hiring manager or HR personnel creating this onboarding process">
+                          <InfoIcon fontSize="small" />
+                        </Tooltip>
+                      ),
+                    }}
                   />
                 </Grid>
 
@@ -254,6 +263,13 @@ const OnboardingForm = () => {
                     required
                     InputLabelProps={{ shrink: true }}
                     margin="normal"
+                    InputProps={{
+                      endAdornment: (
+                        <Tooltip title="The deadline by which the candidate must complete all onboarding tasks">
+                           <InfoIcon fontSize="small" />
+                        </Tooltip>
+                      ),
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -267,6 +283,11 @@ const OnboardingForm = () => {
                       label="Onboarding Process"
                       onChange={(e) =>
                         setOnboarding((prev) => ({ ...prev, onboardingProcess: e.target.value }))
+                      }
+                      endAdornment={
+                        <Tooltip title="Select the specific onboarding stage to assign to this candidate">
+                         <InfoIcon fontSize="small" />
+                        </Tooltip>
                       }
                     >
                       <MenuItem value="document-verification">Document Verification</MenuItem>
@@ -290,6 +311,13 @@ const OnboardingForm = () => {
                 multiline
                 rows={3}
                 placeholder="Provide details about what the candidate needs to do"
+                InputProps={{
+                  endAdornment: (
+                    <Tooltip title="Add specific instructions, meeting links, or detailed requirements for the candidate to complete this stage">
+                      <InfoIcon fontSize="small" />
+                    </Tooltip>
+                  ),
+                }}
               />
 
               <Grid item xs={12}>
@@ -303,6 +331,11 @@ const OnboardingForm = () => {
                     renderValue={(selected) => selected.map(value => 
                       documentOptions.find(option => option.value === value)?.label
                     ).join(', ')}
+                    endAdornment={
+                      <Tooltip title="Select all documents that the candidate must submit. They will receive an email with this checklist.">
+                         <InfoIcon fontSize="small" />
+                      </Tooltip>
+                    }
                   >
                     {documentOptions.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
@@ -313,10 +346,12 @@ const OnboardingForm = () => {
                 </FormControl>
 
                 <Box sx={{ mt: 2 }}>
-                  <Button variant="outlined" component="label">
-                    Upload Additional Files
-                    <input type="file" hidden onChange={handleFileChange} multiple />
-                  </Button>
+                  <Tooltip title="Upload any reference materials or templates that the candidate will need to complete this process">
+                    <Button variant="outlined" component="label">
+                      Upload Additional Files
+                      <input type="file" hidden onChange={handleFileChange} multiple />
+                    </Button>
+                  </Tooltip>
 
                   {onboarding.uploadedFiles.length > 0 && (
                     <Box sx={{ mt: 2 }}>

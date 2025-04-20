@@ -140,6 +140,7 @@ const ViewEmployees = () => {
           (employee.employee_id || '').toString().toLowerCase().includes(query) ||
           (employee.firstName || '').toLowerCase().includes(query) ||
           (employee.lastName || '').toLowerCase().includes(query) ||
+          (employee.personalemail || '').toLowerCase().includes(query) ||
           (employee.dateOfBirth || '').toLowerCase().includes(query) ||
           (employee.anniversary || '').toLowerCase().includes(query) ||
           (employee.phoneNumber || '').toLowerCase().includes(query) ||
@@ -298,7 +299,7 @@ const ViewEmployees = () => {
                   <TableCell>{employee.employee_id || "Not Available"}</TableCell>
                   <TableCell>{employee.firstName || "Not Available"}</TableCell>
                   <TableCell>{employee.lastName || "Not Available"}</TableCell>
-                  <TableCell>{employee.email || "Not Available"}</TableCell>
+                  <TableCell>{employee.personalemail || "Not Available"}</TableCell>
                   <TableCell>{employee.dateOfBirth || "Not Available"}</TableCell>
                   <TableCell>{employee.anniversary || "Not Available"}</TableCell>
                   <TableCell>{employee.phoneNumber || "Not Available"}</TableCell>

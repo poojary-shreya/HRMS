@@ -67,6 +67,8 @@ const Navbar = () => {
   const [notificationAnchor, setNotificationAnchor] = useState(null);
   const [attendanceAnchor, setAttendanceAnchor] = useState(null);
   const [form16, setform16]=useState(null);
+  const [onlyEmployeeAnchor, setOnlyEmployeeAnchor] = useState(null);
+
 
   const handleMenuOpen = (event, setter) => setter(event.currentTarget);
 
@@ -170,31 +172,68 @@ const Navbar = () => {
             </Menu>
 
 
-            <Button color="inherit" onClick={(e) => handleMenuOpen(e, setEmployeeManagementAnchor)} sx={{ color: "black" }} endIcon={<KeyboardArrowDownIcon />}>
-              Employee Management
-            </Button>
-            <Menu anchorEl={employeeManagementAnchor} open={Boolean(employeeManagementAnchor)} onClose={handleCloseMenus}>
+            <Button
+  color="inherit"
+  onClick={(e) => handleMenuOpen(e, setEmployeeManagementAnchor)}
+  sx={{ color: "black" }}
+  endIcon={<KeyboardArrowDownIcon />}>
+  Employee Management
+</Button>
 
-              <MenuItem onClick={(e) => handleMenuOpen(e, setAddEmployeeAnchor)}>Add Employee</MenuItem>
-              <Menu anchorEl={addEmployeeAnchor} open={Boolean(addEmployeeAnchor)} onClose={handleCloseMenus} PaperProps={{ sx: { ml: 18 } }} endIcon={<KeyboardArrowDownIcon sx={{ color: 'black' }} />}>
-                <MenuItem onClick={() => handleNavigation("/addpersonal", "employeeManagement")}>Add Personal Details</MenuItem>
-                <MenuItem onClick={() => handleNavigation("/addfinancial", "employeeManagement")}>Add Financial Details</MenuItem>
-                <MenuItem onClick={() => handleNavigation("/addrole", "employeeManagement")}>Add Roles</MenuItem>
-              </Menu>
+<Menu
+  anchorEl={employeeManagementAnchor}
+  open={Boolean(employeeManagementAnchor)}
+  onClose={handleCloseMenus}
+>
+  {userRole === "hr" && (
+    <>
+      {/* Add Employee */}
+      <MenuItem onClick={(e) => handleMenuOpen(e, setAddEmployeeAnchor)}>Add Employee</MenuItem>
+      <Menu
+        anchorEl={addEmployeeAnchor}
+        open={Boolean(addEmployeeAnchor)}
+        onClose={handleCloseMenus}
+        PaperProps={{ sx: { ml: 18 } }}
+        endIcon={<KeyboardArrowDownIcon sx={{ color: 'black' }} />}
+      >
+        <MenuItem onClick={() => handleNavigation("/addpersonal", "employeeManagement")}>Add Personal Details</MenuItem>
+        <MenuItem onClick={() => handleNavigation("/addfinancial", "employeeManagement")}>Add Financial Details</MenuItem>
+        <MenuItem onClick={() => handleNavigation("/addrole", "employeeManagement")}>Add Roles</MenuItem>
+      </Menu>
 
-             
+      {/* View Employee */}
+      <MenuItem onClick={(e) => handleMenuOpen(e, setViewEmployeeAnchor)}>View Employees</MenuItem>
+      <Menu
+        anchorEl={viewEmployeeAnchor}
+        open={Boolean(viewEmployeeAnchor)}
+        onClose={handleCloseMenus}
+        PaperProps={{ sx: { ml: 18 } }}
+        endIcon={<KeyboardArrowDownIcon sx={{ color: 'black' }} />}
+      >
+        <MenuItem onClick={() => handleNavigation("/viewpersonal", "employeeManagement")}>View Personal Details</MenuItem>
+        <MenuItem onClick={() => handleNavigation("/viewfinancial", "employeeManagement")}>View Financial Details</MenuItem>
+        <MenuItem onClick={() => handleNavigation("/viewrole", "employeeManagement")}>View Roles</MenuItem>
+      </Menu>
 
+      {/* Search */}
+      <MenuItem onClick={() => handleNavigation("/search", "employeeManagement")}>
+        Search Employees
+      </MenuItem>
+    </>
+  )}
 
-              <MenuItem onClick={(e) => handleMenuOpen(e, setViewEmployeeAnchor)}>View Employees</MenuItem>
-              <Menu anchorEl={viewEmployeeAnchor} open={Boolean(viewEmployeeAnchor)} onClose={handleCloseMenus} PaperProps={{ sx: { ml: 18 } }} endIcon={<KeyboardArrowDownIcon sx={{ color: 'black' }} />}>
-                <MenuItem onClick={() => handleNavigation("/viewpersonal", "employeeManagement")}>View Personal Details</MenuItem>
-                <MenuItem onClick={() => handleNavigation("/viewfinancial", "employeeManagement")}>View Financial Details</MenuItem>
-                <MenuItem onClick={() => handleNavigation("/viewrole", "employeeManagement")}>View Roles</MenuItem>
-              </Menu>
-              <MenuItem key="payroll-calc" onClick={() => handleNavigation("/search", "employeeManagement")}>Search Employees</MenuItem>
-            </Menu>
-           
-           
+  {userRole === "employee" && (
+    <>
+    
+<MenuItem onClick={() => handleNavigation("/employee", "employeeManagement")}>
+  Employee View
+</MenuItem>
+        
+      
+    </>
+  )}
+</Menu>
+
               
 
 
