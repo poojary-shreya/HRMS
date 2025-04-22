@@ -8,7 +8,6 @@ import {
   Box,
   Paper,
   CircularProgress,
-  Divider,
   Chip,
   Alert,
   Snackbar
@@ -66,7 +65,7 @@ const EmployeeProfile = () => {
     certificates: []
   });
 
-  // Fields that employees are allowed to edit
+
   const editableFields = {
     contactInfo: ["phoneNumber", "houseNumber", "street", "crossStreet", "area", "city", "pinCode"],
     emergencyContact: ["mobile", "landline"],
@@ -88,7 +87,7 @@ const EmployeeProfile = () => {
       try {
         setLoading(true);
         
-        // Create an axios instance with base URL
+    
         const api = axios.create({
           baseURL: 'http://localhost:5000/api',
           headers: {
@@ -97,11 +96,11 @@ const EmployeeProfile = () => {
           withCredentials: true
         });
         
-        // Fetch the employee's data using the current user endpoints
+      
         const [personalResponse, financialResponse, roleResponse] = await Promise.all([
-          api.get('/profile'), // Updated to match backend route
-          api.get('/financial'), // Updated to match backend route
-          api.get('/role') // Updated to match backend route
+          api.get('/profile'), 
+          api.get('/financial'), 
+          api.get('/role') 
         ]);
         
         if (personalResponse.data.success) {
@@ -210,7 +209,7 @@ const EmployeeProfile = () => {
     try {
       setLoading(true);
       
-      // Only send the data that the employee is allowed to edit
+    
       const payload = {
         personalemail: profileData.personalDetails.personalemail,
         anniversary: profileData.personalDetails.anniversary,
@@ -218,7 +217,7 @@ const EmployeeProfile = () => {
         houseNumber: profileData.contactInfo.houseNumber,
         street: profileData.contactInfo.street,
         crossStreet: profileData.contactInfo.crossStreet,
-        panNumber: profileData.personalDetails.panNumber,     // Add this
+        panNumber: profileData.personalDetails.panNumber,     
         adharCardNumber: profileData.personalDetails.adharCardNumber,
         area: profileData.contactInfo.area,
         city: profileData.contactInfo.city,
@@ -227,7 +226,7 @@ const EmployeeProfile = () => {
         landline: profileData.emergencyContact.landline,
       };
       
-      // Use employee ID from the profile data
+    
       const employeeId = profileData.employmentDetails.employeeId;
       
       if (!employeeId) {
@@ -301,14 +300,6 @@ const EmployeeProfile = () => {
               label="Company Email"
               fullWidth
               value={profileData.employmentDetails.companyemail}
-              disabled={true}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              label="Department"
-              fullWidth
-              value={profileData.employmentDetails.department}
               disabled={true}
             />
           </Grid>

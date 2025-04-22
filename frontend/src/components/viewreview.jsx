@@ -281,15 +281,7 @@ const EmployeeReviewsPage = () => {
                   onChange={(e) => setEmployeeIdInput(e.target.value)}
                   sx={{ width: "300px" }}
                 />
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleEmployeeSearch}
-                  startIcon={<Search />}
-                  sx={{ width: "150px" }}
-                >
-                  Search
-                </Button>
+              
               </Box>
               
             

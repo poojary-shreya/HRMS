@@ -1,5 +1,3 @@
-
-
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/db.js";
 import Company from "./companyDetailsmodel.js";
@@ -40,40 +38,130 @@ const Employee = sequelize.define("personal", {
       key: "registration_no",
     },
   },
-  dateOfBirth: DataTypes.DATEONLY,
-  anniversary: DataTypes.DATEONLY,
-  gender: DataTypes.STRING,
-  panNumber: DataTypes.STRING,
-  panCardFile: DataTypes.STRING,
-  adharCardNumber: DataTypes.STRING,
-  adharCardFile: DataTypes.STRING,
-  phoneNumber: DataTypes.STRING,
-  houseNumber: DataTypes.STRING,
-  street: DataTypes.STRING,
-  crossStreet: DataTypes.STRING,
-  area: DataTypes.STRING,
-  city: DataTypes.STRING,
-  pinCode: DataTypes.STRING,
-  degree: DataTypes.STRING,
-  institution: DataTypes.STRING,
-  year: DataTypes.INTEGER,
-  qualificationFile: DataTypes.STRING,
-  certificationName: DataTypes.STRING,
-  issuedBy: DataTypes.STRING,
-  certificationDate: DataTypes.DATEONLY,
-  certificationFile: DataTypes.STRING,
-  nomineeName: DataTypes.STRING,
-  relationship: DataTypes.STRING,
-  nomineeAge: DataTypes.INTEGER,
-  mobile: DataTypes.STRING,
-  landline: DataTypes.STRING,
-  individualInsurance: DataTypes.STRING,
-  groupInsurance: DataTypes.STRING
+  dateOfBirth: {
+    type: DataTypes.DATEONLY,
+    allowNull: true
+  },
+  anniversary: {
+    type: DataTypes.DATEONLY,
+    allowNull: true  // Making explicitly nullable
+  },
+  gender: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  panNumber: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  panCardFile: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  adharCardNumber: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  adharCardFile: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  phoneNumber: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  houseNumber: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  street: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  crossStreet: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  area: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  city: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  pinCode: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  degree: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  institution: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  year: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  qualificationFile: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  certificationName: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  issuedBy: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  certificationDate: {
+    type: DataTypes.DATEONLY,
+    allowNull: true
+  },
+  certificationFile: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  nomineeName: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  relationship: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  nomineeAge: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  mobile: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  landline: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  individualInsurance: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  groupInsurance: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  personalPhoto: {
+    type: DataTypes.STRING,
+    allowNull: true
+  }
 }, {
   tableName: "personaldetails",
   timestamps: true,
 });
-
 
 Employee.associate = (models) => {
   Employee.hasOne(models.Financial, {
@@ -100,10 +188,6 @@ Employee.associate = (models) => {
     as: "leaveBalance"
   });
   
-  Employee.hasMany(models.Goal, {
-    foreignKey: "employee_id",
-  });
-  
   Employee.hasMany(models.PIP, {
     foreignKey: "employee_id",
   });
@@ -112,11 +196,11 @@ Employee.associate = (models) => {
     foreignKey: "employee_id",
   });
   
-
   Employee.hasMany(models.Onboarding, {
     foreignKey: "employee_id",
     as: "onboardings"
   });
+  
   Employee.hasMany(models.Training, {
     foreignKey: "employee_id",
     as: "trainings"

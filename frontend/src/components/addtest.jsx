@@ -727,23 +727,7 @@ function TestQuestionManagement() {
                           </FormControl>
                         </Grid>
                         
-                        {/* <Grid item xs={12} md={6}>
-                          <FormControl fullWidth>
-                            <InputLabel>Related Training Video (Optional)</InputLabel>
-                            <Select
-                              value={question.videoId}
-                              label="Related Training Video (Optional)"
-                              onChange={(e) => handleBulkQuestionChange(qIndex, 'videoId', e.target.value)}
-                            >
-                              <MenuItem value="">None</MenuItem>
-                              {videos.map((video) => (
-                                <MenuItem key={video.id} value={video.id}>
-                                  {video.title}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        </Grid> */}
+                      
                       </Grid>
                     </AccordionDetails>
                   </Accordion>

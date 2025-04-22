@@ -21,7 +21,8 @@ import {
   TableHead,
   TableRow,
   TableBody,
-  LinearProgress
+  LinearProgress,
+  Link
 } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
@@ -40,6 +41,7 @@ const ManualAttendance = () => {
   const [hasActiveCheckIn, setHasActiveCheckIn] = useState(false);
   const [location, setLocation] = useState(null);
   
+  // Get employee's today's records on component mount
   useEffect(() => {
     fetchTodayRecords();
   }, []);
@@ -53,7 +55,7 @@ const ManualAttendance = () => {
       setHasActiveCheckIn(response.data.summary?.hasActiveCheckIn || false);
     } catch (err) {
       console.error('Error fetching today\'s records:', err);
-   
+      // If 404, it means no records for today, which is fine
       if (err.response && err.response.status !== 404) {
         setError(err.response.data.message || 'Failed to fetch today\'s attendance records.');
       }
@@ -96,7 +98,7 @@ const ManualAttendance = () => {
       setLoading(true);
       setError(null);
       
-
+      // Get current location
       const position = await getCurrentLocation();
       
       const response = await axios.post('http://localhost:5000/api/manual/check-in', { 
@@ -106,7 +108,7 @@ const ManualAttendance = () => {
       }, {withCredentials: true});
       
       setSuccess(response.data.message);
-      await fetchTodayRecords(); 
+      await fetchTodayRecords(); // Refresh records
     } catch (err) {
       console.error('Check-in error:', err);
       setError(err.message || err.response?.data?.error || 'Failed to check in. Please try again.');
@@ -120,6 +122,7 @@ const ManualAttendance = () => {
       setLoading(true);
       setError(null);
       
+      // Get current location
       const position = await getCurrentLocation();
       
       const response = await axios.post('http://localhost:5000/api/manual/check-out', {
@@ -128,7 +131,7 @@ const ManualAttendance = () => {
       }, {withCredentials: true});
       
       setSuccess(response.data.message);
-      await fetchTodayRecords(); 
+      await fetchTodayRecords(); // Refresh records
     } catch (err) {
       console.error('Check-out error:', err);
       setError(err.message || err.response?.data?.error || 'Failed to check out. Please try again.');
@@ -136,6 +139,27 @@ const ManualAttendance = () => {
       setLoading(false);
     }
   };
+   const getGoogleMapsLink = (lat, lng) => {
+      if (!lat || !lng) return null;
+      return `https://www.google.com/maps?q=${lat},${lng}`;
+    };
+    
+    // Format location display
+    const formatLocation = (lat, lng) => {
+      if (!lat || !lng) return '-';
+      
+      return (
+        <Link 
+          href={getGoogleMapsLink(lat, lng)} 
+          target="_blank" 
+          rel="noopener"
+          sx={{ display: 'flex', alignItems: 'center' }}
+        >
+          {lat}, {lng}
+          {/* <LocationOn fontSize="small" sx={{ ml: 0.5 }} /> */}
+        </Link>
+      );
+    };
   
   const handleCloseSnackbar = () => {
     setSuccess(null);
@@ -144,7 +168,7 @@ const ManualAttendance = () => {
 
   const formatTime = (timeString) => {
     if (!timeString) return '---';
-    return timeString.substring(0, 5); 
+    return timeString.substring(0, 5); // Extract HH:MM from HH:MM:SS
   };
   
   return (
@@ -205,7 +229,9 @@ const ManualAttendance = () => {
                 <TableRow sx={{ bgcolor: '#f5f5f5' }}>
                   <TableCell>Sl.No</TableCell>
                   <TableCell>Check-in Time</TableCell>
+                  <TableCell>In Location</TableCell>
                   <TableCell>Check-out Time</TableCell>
+                  <TableCell>Out Location</TableCell>
                   <TableCell>Hours</TableCell>
                 </TableRow>
               </TableHead>
@@ -214,7 +240,9 @@ const ManualAttendance = () => {
                   <TableRow key={record.id}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>{formatTime(record.in_time)}</TableCell>
+                    <TableCell>{formatLocation(record.in_latitude, record.in_longitude)}</TableCell>
                     <TableCell>{record.out_time ? formatTime(record.out_time) : '---'}</TableCell>
+                    <TableCell>{formatLocation(record.out_latitude, record.out_longitude)}</TableCell>
                     <TableCell>{record.formatted_time || (record.total_hours ? record.formatted_time : '---')}</TableCell>
                   </TableRow>
                 ))}
@@ -250,7 +278,7 @@ const ManualAttendance = () => {
             variant="contained"
             color="primary"
             fullWidth
-         
+            // startIcon={<LoginIcon />}
             onClick={handleCheckIn}
             disabled={loading || hasActiveCheckIn || locationLoading}
           >
@@ -261,7 +289,7 @@ const ManualAttendance = () => {
             variant="contained"
             color="secondary"
             fullWidth
-        
+            // startIcon={<ExitToAppIcon />}
             onClick={handleCheckOut}
             disabled={loading || !hasActiveCheckIn || locationLoading}
           >

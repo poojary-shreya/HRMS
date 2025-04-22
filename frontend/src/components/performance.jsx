@@ -186,7 +186,40 @@ const PerformanceManagement = () => {
     progress: 0,
     team: "Custom"
   });
-
+  const teamTooltip = {
+    title: "Select the department or team this goal applies to",
+    content: "Choose the relevant team to access team-specific goal templates and metrics."
+  };
+  
+  // Employee ID Tooltip
+  const employeeIdTooltip = {
+    title: "Enter Employee ID",
+    content: "Provide the unique identifier for the employee this goal is assigned to."
+  };
+  
+  // Goal Title Tooltip
+  const goalTitleTooltip = {
+    title: "Select a predefined goal template",
+    content: "Choose from team-specific goal templates or create a custom goal. Templates include predefined descriptions and metrics."
+  };
+  
+  // Description Tooltip
+  const descriptionTooltip = {
+    title: "Goal Description",
+    content: "Provide a detailed description of what needs to be accomplished. Include specific deliverables and success criteria for clarity."
+  };
+  
+  // Metrics Tooltip
+  const metricsTooltip = {
+    title: "Select evaluation metric",
+    content: "Choose how progress and success will be measured for this goal. Each department has specific relevant metrics available."
+  };
+  
+  // Priority Tooltip
+  const priorityTooltip = {
+    title: "Set goal priority",
+    content: "High: Critical for business success. Medium: Important but not urgent. Low: Beneficial but can be deprioritized if needed."
+  };
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
@@ -495,7 +528,7 @@ const PerformanceManagement = () => {
                       <Flag sx={{ mr: 1 }} /> Set SMART Goals
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
-
+                    <Tooltip title={teamTooltip.content} arrow placement="right">
                 
                     <FormControl fullWidth margin="normal">
                       <InputLabel>Team</InputLabel>
@@ -513,6 +546,10 @@ const PerformanceManagement = () => {
                         <MenuItem value="Engineering">Engineering </MenuItem>
                       </Select>
                     </FormControl>
+                    </Tooltip>
+                    
+    
+    <Tooltip title={employeeIdTooltip.content} arrow placement="right">
                     <TextField
                       fullWidth
                       label="Employee ID"
@@ -522,9 +559,10 @@ const PerformanceManagement = () => {
                       required
 
                     />
-
+</Tooltip>
                 
                     {selectedTeam !== "Custom" && (
+                         <Tooltip title={goalTitleTooltip.content} arrow placement="right">
                       <FormControl fullWidth margin="normal">
                         <InputLabel>Goal Title</InputLabel>
                         <Select
@@ -540,9 +578,10 @@ const PerformanceManagement = () => {
                           ))}
                         </Select>
                       </FormControl>
+                      </Tooltip>
                     )}
 
-
+<Tooltip title={descriptionTooltip.content} arrow placement="right">
                     <TextField
                       fullWidth
                       multiline
@@ -553,6 +592,9 @@ const PerformanceManagement = () => {
                       margin="normal"
                       placeholder="Provide a detailed description of the goal..."
                     />
+                    </Tooltip>
+
+                    <Tooltip title={metricsTooltip.content} arrow placement="right">
                     <FormControl fullWidth margin="normal">
                       <InputLabel>Metric to Evaluate</InputLabel>
                       <Select
@@ -619,6 +661,8 @@ const PerformanceManagement = () => {
 
                       </Select>
                     </FormControl>
+                    </Tooltip>
+                    <Tooltip title={priorityTooltip.content} arrow placement="right">
                     <FormControl fullWidth margin="normal">
                       <InputLabel>Priority</InputLabel>
                       <Select
@@ -631,7 +675,7 @@ const PerformanceManagement = () => {
                         <MenuItem value="Low">Low</MenuItem>
                       </Select>
                     </FormControl>
-
+</Tooltip>
 
                     <DatePicker
                       label="Due Date"

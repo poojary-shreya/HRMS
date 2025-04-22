@@ -31,7 +31,7 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,Tooltip
 } from "@mui/material";
 import {
   Assignment,
@@ -327,6 +327,7 @@ const ManagerSuccessionPlan = () => {
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
                   <FormControl fullWidth margin="normal" required>
+                  <Tooltip title="Select the employee who currently holds this position" placement="top" arrow>
   <TextField
     label="Current Employee"
     value={newSuccessionPlan.employee_id}
@@ -338,9 +339,11 @@ const ManagerSuccessionPlan = () => {
     }
     disabled={loading.employees}
   />
+  </Tooltip>
 </FormControl>
 
                   
+            <Tooltip title="Enter the title of the position for this succession plan" placement="top" arrow>
                   <TextField
                     fullWidth
                     label="Position"
@@ -348,8 +351,8 @@ const ManagerSuccessionPlan = () => {
                     onChange={(e) => setNewSuccessionPlan({...newSuccessionPlan, position: e.target.value})}
                     margin="normal"
                     required
-                  />
-                  
+                  /></Tooltip>
+                  <Tooltip title="List potential candidates who could fill this position in the future (separate multiple names with commas)" placement="top" arrow>
                   <TextField
                     fullWidth
                     label="Potential Successors"
@@ -358,8 +361,10 @@ const ManagerSuccessionPlan = () => {
                     margin="normal"
                     placeholder="Comma-separated list of candidates"
                   />
-                  
+                  </Tooltip>
+                  <Tooltip title="Estimate how soon the successor(s) will be ready to assume the position" placement="top" arrow>
                   <FormControl fullWidth margin="normal" required>
+                 
                     <InputLabel>Readiness Level</InputLabel>
                     <Select
                       value={newSuccessionPlan.readinessLevel}
@@ -373,8 +378,10 @@ const ManagerSuccessionPlan = () => {
                       <MenuItem value="1-2 years">1-2 years</MenuItem>
                       <MenuItem value="2+ years">2+ years</MenuItem>
                     </Select>
+
                   </FormControl>
-                  
+                  </Tooltip>
+            <Tooltip title="Describe specific skills, training, or experiences that potential successors need to develop" placement="top" arrow>
                   <TextField
                     fullWidth
                     multiline
@@ -386,7 +393,7 @@ const ManagerSuccessionPlan = () => {
                     placeholder="Skills and experiences needed for potential successors..."
                     required
                   />
-                  
+                  </Tooltip>
                   <DatePicker
                     label="Target Timeline"
                     value={newSuccessionPlan.timeline ? new Date(newSuccessionPlan.timeline) : null}

@@ -16,21 +16,21 @@ import {
 } from '@mui/material';
 
 const ManagerApproval = () => {
-  const [managerId, setManagerId] = useState('');
   const [pendingLeaves, setPendingLeaves] = useState([]);
   const [selectedLeave, setSelectedLeave] = useState(null);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
+  const [managerId, setManagerId] = useState('');
 
-  const fetchPendingLeaves = async () => {
-    if (!managerId.trim()) {
-      alert('Please enter a Manager ID');
-      return;
-    }
+  useEffect(() => {
+    setManagerId('current_manager_id');
+    fetchAllPendingLeaves('current_manager_id');
+  }, []);
 
+  const fetchAllPendingLeaves = async (manager_id) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/leaves/pending/${managerId.trim()}`);
+      const response = await fetch(`http://localhost:5000/api/leaves/pending/${manager_id}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch pending leaves');
@@ -81,21 +81,7 @@ const ManagerApproval = () => {
     <Container maxWidth="1500px" sx={{ py: 4 }}>
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h4" gutterBottom align='center' fontWeight="bold">Manager Approval</Typography>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <TextField
-            label="Manager ID"
-            value={managerId}
-            onChange={(e) => setManagerId(e.target.value.trim())}
-            sx={{ width: 300 }}
-          />
-          <Button
-            variant="contained"
-            onClick={fetchPendingLeaves}
-            disabled={!managerId || loading}
-          >
-            {loading ? <CircularProgress size={24} /> : 'Load Requests'}
-          </Button>
-        </Box>
+        {loading && <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}><CircularProgress /></Box>}
       </Paper>
 
       {pendingLeaves.length === 0 ? (

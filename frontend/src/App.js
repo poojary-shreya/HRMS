@@ -1,7 +1,10 @@
-import React from "react";
+
+import React, { useState} from 'react';
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { Routes, Route, Link, useLocation } from "react-router-dom";
+import { Routes, Route, Link, useLocation,} from "react-router-dom";
+
+import { Outlet } from 'react-router-dom';
 
 import Navbar from "./components/navbar.jsx";
 import HomePage from "./components/home.jsx";
@@ -72,6 +75,12 @@ import Form16 from "./components/form16.jsx";
 import ManualAttendance from "./components/ManualAttendance.jsx";
 import HRTestManagement from "./components/addtest.jsx";
 import EmployeeProfile from "./components/employeeprofile.jsx";
+import Sidebar from "./components/Sidebar.jsx";
+import Form12BB from "./components/Form12BB.jsx";
+import ViewCtc from "./components/ViewCtc.jsx";
+import ViewForm12BB from "./components/View12BB.jsx"
+import Claims from "./components/Claims.jsx";
+import ViewClaims from "./components/ViewClaims.jsx";
 const theme = createTheme({
   palette: {
     primary: { main: "#1976d2" },
@@ -84,12 +93,31 @@ const App = () => {
 
 
 
-
+  const[sidebaropen, setSidebarOpen]=useState(false);
 
   return (
+    <Box sx={{ display: 'flex', flexDirection: 'column',  }}>
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Navbar />
+    <CssBaseline />
+    <Navbar />
+    <Box sx={{ 
+      display: 'flex', 
+      flexGrow: 1, 
+      overflow: 'hidden' 
+    }}>
+      <Sidebar open={sidebaropen} setOpen={setSidebarOpen}/>
+
+      <Box component="main" sx={{
+        flexGrow: 1,
+        p: 3,
+        // ml: '250px',
+        // backgroundColor: '#f4f6f8',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        transition: "margin-left 0.3s ease, width 0.3s ease",
+        width: sidebaropen ? "calc(100% - 250px)" : "calc(100% - 72px)",
+      }}>
+        <Outlet />
 
 
 
@@ -170,6 +198,7 @@ const App = () => {
           <Route path="/search" element={<SearchEmployee />} />
           <Route path="/form16-partA" element={<FormPartA />} />
           <Route path="/form16-partB" element={<FormPartB />} />
+          <Route path="/viewform12bb" element={<ViewForm12BB/>}/>
         </Route>
         <Route element={<ProtectedRoute allowedRoles={["employee"]} />}>
           <Route path="/attendance" element={<Attendance />} />
@@ -180,9 +209,13 @@ const App = () => {
           <Route path="/certificate" element={<EmployeeCertificateView />} />
           <Route path="/projected-tax" element={<ProjectedTax />} />
           <Route path="/form16" element={<Form16 />} />
-
+          <Route path="/view-ctc" element={<ViewCtc/>} />
+          <Route path="/form12bb" element={<Form12BB/>}/>
+          <Route path="/claims" element={<Claims/>}/>
         </Route>
-
+        <Route element={<ProtectedRoute allowedRoles={["manager"]}/>}>
+        <Route path="/viewclaims" element={<ViewClaims/>}/>
+        </Route>
         <Route element={<ProtectedRoute allowedRoles={["hr"]} />}>
           <Route path="/job-posting" element={<JobPosting />} />
           <Route path="/candidates" element={<Tracking />} />
@@ -203,7 +236,10 @@ const App = () => {
 
 
       </Routes>
+      </Box>
+      </Box>
     </ThemeProvider>
+    </Box>
   );
 };
 

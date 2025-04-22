@@ -161,7 +161,7 @@ const Navbar = () => {
                
                 <>
                   
-                  <MenuItem onClick={() => handleNavigation("/upload", "recruitment")}> upload </MenuItem>
+                  <MenuItem onClick={() => handleNavigation("/upload", "recruitment")}>Employee Document Upload </MenuItem>
                 </>
               ) : (
                 
@@ -226,7 +226,7 @@ const Navbar = () => {
     <>
     
 <MenuItem onClick={() => handleNavigation("/employee", "employeeManagement")}>
-  Employee View
+  Employee Profile
 </MenuItem>
         
       
@@ -324,7 +324,7 @@ const Navbar = () => {
               Advance Salary
             </MenuItem>
             <MenuItem onClick={() => handleNavigation("/certificate", "employeeRequest")}>
-              View certificates
+            View certificates
             </MenuItem>
             
           </>

@@ -325,7 +325,7 @@ const ImprovementManagement = () => {
                       </FormControl>
 
                     </Box>
-
+                    <Tooltip title="Specify the primary reason this improvement plan is being created" placement="top" arrow>
                     <TextField
                       fullWidth
                       label="Reason for Plan"
@@ -337,7 +337,8 @@ const ImprovementManagement = () => {
                       placeholder="E.g., Performance improvement, Skill development"
                       sx={{ mb: 2 }}
                     />
-
+</Tooltip>
+<Tooltip title="List specific, measurable objectives the employee needs to achieve" placement="top" arrow>
                     <TextField
                       fullWidth
                       multiline
@@ -351,7 +352,7 @@ const ImprovementManagement = () => {
                       variant="outlined"
                       sx={{ mb: 2 }}
                     />
-
+</Tooltip>
                     <Grid container spacing={2} sx={{ mb: 2 }}>
                       <Grid item xs={6}>
                         <DatePicker
@@ -374,7 +375,7 @@ const ImprovementManagement = () => {
                         />
                       </Grid>
                     </Grid>
-
+                    <Tooltip title="Define specific checkpoints to measure progress during the plan period" placement="top" arrow>
                     <TextField
                       fullWidth
                       multiline
@@ -387,7 +388,8 @@ const ImprovementManagement = () => {
                       variant="outlined"
                       sx={{ mb: 2 }}
                     />
-
+</Tooltip>
+<Tooltip title="Determine how often progress meetings should be scheduled" placement="top" arrow>
                     <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
                       <InputLabel>Meeting Frequency</InputLabel>
                       <Select
@@ -401,7 +403,7 @@ const ImprovementManagement = () => {
                         <MenuItem value="Monthly">Monthly</MenuItem>
                       </Select>
                     </FormControl>
-
+                    </Tooltip>
                     <Button
                       variant="contained"
                       color="primary"

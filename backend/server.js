@@ -43,7 +43,8 @@ import form16ARoutes from "./routes/formpartARoutes.js"
 import form16BRoutes from "./routes/formpartBRoutes.js"
 import form16Routes from "./routes/getForm16Routes.js"
 import session from "express-session";
-
+import Form12BBRoutes from "./routes/form12bbRoutes.js"
+import claimRoutes from "./routes/claimRoutes.js"
 
 
 dotenv.config();
@@ -99,6 +100,8 @@ app.use("/api/payslip",payslipRoutes)
 app.use("/api/manual",ManualAttendanceRoutes);
 app.use('/api', trainingVideoRoutes);
 app.use('/api',testingRoutes)
+app.use("/api/form12bb",Form12BBRoutes);
+app.use("/api/claims",claimRoutes);
 const startServer = async () => {
   try {
     await connectDB();

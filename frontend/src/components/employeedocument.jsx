@@ -25,7 +25,7 @@ import {
 } from "@mui/material";
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 const EmployeeUploadDoc = () => {
-  const { register, handleSubmit, reset, setValue, control } = useForm();
+  const { register, handleSubmit, reset, setValue, control,formState:{ errors } } = useForm();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [employeeId, setEmployeeId] = useState("");
@@ -45,6 +45,13 @@ const EmployeeUploadDoc = () => {
     section80E: "Deduction for interest paid on education loan",
     section80EEB: "Deduction for interest on loan for electric vehicle purchase (up to ₹1.5 lakh)",
     otherInvestment: "Any investment not covered under standard tax-saving sections"
+  };
+
+  const fieldTooltips = {
+    documentName: "Name of the document you're uploading",
+    amount: "enter the amount which you want to claim",
+    category: "Select the appropriate category for your document",
+    file: "Upload supporting document in PDF, JPG, PNG, or DOCX format"
   };
 
   // Fetch employee ID and documents on component mount
@@ -148,10 +155,45 @@ const EmployeeUploadDoc = () => {
             />
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label="Document Name" {...register("document_name", { required: true })} variant="outlined" />
+          <Tooltip title={fieldTooltips.documentName} placement="top" arrow>
+              <TextField 
+                fullWidth
+                label="Document Name" 
+                {...register("document_name", {
+                  required: "Document name is required",
+                  minLength: {
+                    value: 2,
+                    message: "Document name should be at least 2 characters"
+                  },
+                  
+                })}
+                variant="outlined" 
+                error={!!errors.document_name}
+                helperText={errors.document_name?.message}
+                
+              />
+            </Tooltip>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth label="Claiming Amount" {...register("amount", { required: true })} variant="outlined" />
+          <Tooltip title={fieldTooltips.amount} placement="top" arrow>
+              <TextField 
+                fullWidth 
+                label="Claiming Amount" 
+                {...register("amount", { 
+                  required: "Amount is required",
+                  pattern: {
+                    value: /^[0-9]+(\.[0-9]{1,2})?$/,
+                    message: "Please enter a valid amount"
+                  },
+                  validate: value => 
+                    parseFloat(value) > 0 || "Amount must be greater than zero"
+                })} 
+                variant="outlined"
+                error={!!errors.amount}
+                helperText={errors.amount?.message}
+                
+              />
+            </Tooltip>
           </Grid>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth variant="outlined">
@@ -160,9 +202,13 @@ const EmployeeUploadDoc = () => {
                 name="category"
                 control={control}
                 defaultValue=""
-                rules={{ required: true }}
+                rules={{ required: "please select a category" }}
                 render={({ field }) => (
-                  <Select {...field} label="Category">
+                  <Select {...field} 
+                  label="Category"
+                  error={!!errors.category}
+                  >
+                    
                     {Object.entries(categoryTooltips).map(([value, tooltipText]) => {
                       // Convert value to a readable label
                       const label = value
@@ -196,7 +242,15 @@ const EmployeeUploadDoc = () => {
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={6}>
-            <TextField fullWidth type="file" {...register("files", { required: true })} variant="outlined" inputProps={{ accept: ".pdf,.jpg,.png,.docx" }} />
+            <Tooltip title={fieldTooltips.file}placement="top" arrow>
+            <TextField fullWidth type="file" {...register("files", {
+               required: "please upload a document or proof"
+                })}
+                 variant="outlined" 
+                 error={!!errors.files}
+                //  helperText={errors.amount?.message}
+                 inputProps={{ accept: ".pdf,.jpg,.png,.docx" }} />
+               </Tooltip>
           </Grid>
           <Grid item xs={12} sm={6} display="flex">
             <Button variant="contained" color="primary" type="submit" sx={{width:"150px",height:"50px"}} >

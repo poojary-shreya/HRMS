@@ -14,18 +14,20 @@ import {
   DialogActions,
   Snackbar,
   Alert,
-  IconButton
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import axios from 'axios';
-import CloseIcon from '@mui/icons-material/Close'; 
+import CloseIcon from '@mui/icons-material/Close'; // Import CloseIcon
 import { useNavigate } from 'react-router-dom';
+import { TourOutlined } from '@mui/icons-material';
 
 const SimpleTaxFormCreation = () => {
 
     const navigate =useNavigate();
-
+  // State for form inputs
   const [employeeId, setEmployeeId] = useState('');
   const [employeeData, setEmployeeData] = useState(null);
   const [financialYearFrom, setFinancialYearFrom] = useState(null);
@@ -36,28 +38,28 @@ const SimpleTaxFormCreation = () => {
   const [employerAddress, setEmployerAddress] = useState('');
   const [cit, setcit] = useState('');
   
- 
+  // UI states
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(true); 
+  const [dialogOpen, setDialogOpen] = useState(true); // Set to true initially
   const [notification, setNotification] = useState({ open: false, message: '', type: 'info' });
 
-
+  // Use effect to open dialog when component mounts
   useEffect(() => {
     setDialogOpen(true);
   }, []);
 
-
+  // Open the employee search dialog
   const openEmployeeDialog = () => {
     setDialogOpen(true);
   };
 
- 
+  // Close the employee search dialog
   const closeEmployeeDialog = () => {
     setDialogOpen(false);
   };
 
- 
+  // Fetch employee details when search button is clicked in dialog
   const fetchEmployeeDetails = async () => {
     if (!employeeId) return;
     
@@ -66,7 +68,7 @@ const SimpleTaxFormCreation = () => {
       const response = await axios.get(`http://localhost:5000/api/form16A/employee/${employeeId}`);
       console.log(response);
       setEmployeeData(response.data.data);
-   
+    //   setEmployerPan(response.data.data.company.tan || '');
       closeEmployeeDialog();
       setNotification({
         open: true,
@@ -85,6 +87,7 @@ const SimpleTaxFormCreation = () => {
     }
   };
 
+  // Handle tax form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -102,20 +105,20 @@ const SimpleTaxFormCreation = () => {
       const formattedFromDate = new Date(
         financialYearFrom.getFullYear(),
         financialYearFrom.getMonth(),
-        1 
+        1  // First day of the month
       );
       
-    
+      // End date should be the last day of the month
       const lastDay = new Date(
         financialYearTo.getFullYear(),
         financialYearTo.getMonth() + 1,
-        0 
+        0  // Setting day 0 of next month gives the last day of current month
       ).getDate();
       
       const formattedToDate = new Date(
         financialYearTo.getFullYear(),
         financialYearTo.getMonth(),
-        lastDay  
+        lastDay  // Last day of the month
       );
 
 
@@ -154,7 +157,7 @@ console.log('Certificate number extracted:', certificateNo);
           certificateNo: certificateNo,
         } 
       });
-      
+      // Reset form after successful submission
       setEmployeeData(null);
       setEmployeeId('');
       setFinancialYearFrom(null);
@@ -177,12 +180,12 @@ console.log('Certificate number extracted:', certificateNo);
     }
   };
 
-
+  // Close notification
   const handleCloseNotification = () => {
     setNotification({ ...notification, open: false });
   };
 
-
+  // Update assessment year when financial year changes
   const updateAssessmentYear = (date) => {
     if (date) {
       const toYear = date.getFullYear();
@@ -193,12 +196,12 @@ console.log('Certificate number extracted:', certificateNo);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Container fullWidth sx={{ py: 4, }} >
-        <Typography variant="h4" gutterBottom align="center" fontWeight="bold">
+      <Container fullWidth sx={{ py: 4 }}>
+        <Typography variant="h4" gutterBottom align="center">
           Tax Form Creation
         </Typography>
 
-   
+        {/* Button to reopen dialog when needed */}
         {!dialogOpen && (
           <Box display="flex" justifyContent="left" mt={3}>
             <Button variant="contained" color="primary" onClick={openEmployeeDialog}>
@@ -207,7 +210,7 @@ console.log('Certificate number extracted:', certificateNo);
           </Box>
         )}
 
-     
+        {/* Employee Search Dialog */}
         <Dialog open={dialogOpen} onClose={closeEmployeeDialog} maxWidth="sm" fullWidth>
           <DialogTitle>
             Enter Employee ID
@@ -243,11 +246,12 @@ console.log('Certificate number extracted:', certificateNo);
           </DialogContent>
         </Dialog>
 
+        {/* Main Form */}
         {employeeData && (
-          <Paper elevation={3} sx={{ p: 3, mt: 3, }}>
+          <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
             <form onSubmit={handleSubmit}>
               <Grid container spacing={3}>
-              
+                {/* Employee & Company Details */}
                 <Grid item xs={12}>
                   <Typography variant="h6" gutterBottom>
                     Employee Information
@@ -341,6 +345,7 @@ console.log('Certificate number extracted:', certificateNo);
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
+                  <Tooltip title="Tax office where your employer files TDS" placement='top'arrow>
                   <TextField
                     fullWidth
                     label="CIT(Commissioner of Income Tax)"
@@ -348,10 +353,12 @@ console.log('Certificate number extracted:', certificateNo);
                     onChange={(e)=>setcit(e.target.value)}
                     required
                   />
+                  </Tooltip>
                 </Grid>
                 
                 
 
+                {/* Financial Year Selection */}
                 <Grid item xs={12}>
                   <Typography variant="h6" gutterBottom>
                     Financial Year Details
@@ -359,19 +366,27 @@ console.log('Certificate number extracted:', certificateNo);
                 </Grid>
                 
                 <Grid item xs={12} sm={4}>
+                <Tooltip title="Financial year begins in April. Select April and the starting year" placement='top' arrow>
+                <Box>
+                  
                   <DatePicker
                     label="Financial Year From"
                     value={financialYearFrom}
                     onChange={(newValue) => setFinancialYearFrom(newValue)}
                     renderInput={(params) => (
+
                       <TextField {...params} fullWidth required />
                     )}
                     views={['year', 'month']}
                   />
+                  </Box>
+                  </Tooltip>
                 </Grid>
                 
                 <Grid item xs={12} sm={4}>
-                  <DatePicker
+                <Tooltip title="Financial year end in March. Select March and the ending year" placement='top' arrow>
+                  <Box>
+                <DatePicker
                     label="Financial Year To"
                     value={financialYearTo}
                     onChange={updateAssessmentYear}
@@ -379,10 +394,14 @@ console.log('Certificate number extracted:', certificateNo);
                       <TextField {...params} fullWidth required />
                     )}
                     views={['year', 'month']}
-                  />
+                  />             
+                       </Box>
+
+                  </Tooltip>
                 </Grid>
                 
                 <Grid item xs={12} sm={4}>
+                  <Tooltip title="enter the Assessment year" placement='top' arrow>
                   <TextField
                     fullWidth
                     required
@@ -390,9 +409,10 @@ console.log('Certificate number extracted:', certificateNo);
                     value={assessmentYear}
                     onChange={(e) => setAssessmentYear(e.target.value)}
                   />
+                  </Tooltip>
                 </Grid>
 
-              
+                {/* Submit Button */}
                 <Grid item xs={12}>
                   <Button
                     type="submit"
@@ -410,7 +430,7 @@ console.log('Certificate number extracted:', certificateNo);
           </Paper>
         )}
 
-      
+        {/* Notification */}
         <Snackbar 
           open={notification.open} 
           autoHideDuration={5000} 

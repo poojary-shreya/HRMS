@@ -18,7 +18,73 @@ export const addPayroll = async (req, res) => {
 };
 
 
-
+export const getPayrollDetails = async (req, res) => {
+  try {
+    const employee_id = req.session.employee_id;
+    
+    // Check if user is logged in with company email
+    if (!req.session.isCompanyEmail) {
+      return res.status(403).json({ 
+        message: "Access denied: Payroll information can only be accessed when logged in with company email" 
+      });
+    }
+    
+    // First check if employee exists
+    const employee = await Employee.findOne({ where: { employee_id } });
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+    
+    // Check if logged in user is accessing their own information
+    const loggedInEmail = req.session.email;
+    if (loggedInEmail !== employee.companyemail) {
+      return res.status(403).json({ 
+        message: "Access denied: You can only access your own payroll information" 
+      });
+    }
+    
+    console.log("Fetching payroll for employee_id:", employee_id || "N/A");
+    
+    // Get payroll data
+    const payroll = await Payroll.findOne({ where: { employee_id } });
+    if (!payroll) {
+      return res.status(404).json({ message: "Payroll not found for this employee" });
+    }
+    
+    return res.status(200).json({
+      message: "Payroll retrieved successfully",
+      payroll: {
+        // Employee details
+        employee_id: payroll.employee_id,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        phoneNumber: employee.phoneNumber,
+        companyemail: employee.companyemail,
+        
+        // Payroll details
+        pfno: payroll.pfno,
+        uan: payroll.uan,
+        ctc: payroll.ctc,
+        base_salary: payroll.base_salary,
+        hra: payroll.hra,
+        pf: payroll.pf,
+        professional_tax: payroll.professional_tax,
+        medical_allowance: payroll.medical_allowance,
+        newspaper_allowance: payroll.newspaper_allowance,
+        dress_allowance: payroll.dress_allowance,
+        other_allowance: payroll.other_allowance,
+        variable_salary: payroll.variable_salary,
+        joining_bonus: payroll.joining_bonus,
+        joining_bonus_paid: payroll.joining_bonus_paid,
+        total_tax: payroll.total_tax,
+        monthly_tax: payroll.monthly_tax
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching payroll:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
 
 
 export const createPayroll = async (req, res) => {

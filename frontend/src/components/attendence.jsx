@@ -35,7 +35,7 @@ import {
   FormGroup,
   FormControlLabel,
   Switch,
-  Stack,LinearProgress
+  Stack,LinearProgress,Link
 } from '@mui/material';
 import {
   Refresh,
@@ -51,7 +51,7 @@ import {
   Add,
   Upload,
   Save,
-  Close
+  Close,LocationOn
 } from '@mui/icons-material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider, DatePicker, TimePicker } from '@mui/x-date-pickers';
@@ -173,7 +173,27 @@ function AttendanceTracker() {
         return <HowToReg fontSize="small" />;
     }
   };
+  const getGoogleMapsLink = (lat, lng) => {
+    if (!lat || !lng) return null;
+    return `https://www.google.com/maps?q=${lat},${lng}`;
+  };
   
+  // Format location display
+  const formatLocation = (lat, lng) => {
+    if (!lat || !lng) return '-';
+    
+    return (
+      <Link 
+        href={getGoogleMapsLink(lat, lng)} 
+        target="_blank" 
+        rel="noopener"
+        sx={{ display: 'flex', alignItems: 'center' }}
+      >
+        {lat}, {lng}
+        {/* <LocationOn fontSize="small" sx={{ ml: 0.5 }} /> */}
+      </Link>
+    );
+  };
  
   
   const handleManualEntryClose = () => {
@@ -520,9 +540,21 @@ function AttendanceTracker() {
                   </Box>
                 </TableCell>
                 <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', color: 'black' }}>
+                    <LocationOn sx={{ mr: 1, color: 'black' }} />
+                    In Location
+                  </Box>
+                </TableCell>
+                <TableCell>
                   <Box sx={{ display: 'flex', alignItems: 'center',color: 'black' }}>
                     <AccessTime sx={{ mr: 1, color: 'black' }} />
                     Out Time
+                  </Box>
+                </TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', color: 'black' }}>
+                    <LocationOn sx={{ mr: 1, color: 'black' }} />
+                    Out Location
                   </Box>
                 </TableCell>
                 <TableCell>
@@ -549,7 +581,13 @@ function AttendanceTracker() {
                     />
                   </TableCell>
                   <TableCell>{formatTime(record.in_time)}</TableCell>
+                  <TableCell>
+                    {formatLocation(record.in_latitude, record.in_longitude)}
+                  </TableCell>
                   <TableCell>{formatTime(record.out_time)}</TableCell>
+                  <TableCell>
+                    {formatLocation(record.out_latitude, record.out_longitude)}
+                  </TableCell>
                   <TableCell>
                     {record.total_hours ? (
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>

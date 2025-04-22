@@ -7,10 +7,6 @@ import {
   Card,
   CardContent,
   Divider,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Button,
   Paper,
   Grid,
@@ -19,19 +15,16 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  CircularProgress,
   LinearProgress,
-  IconButton,
   Snackbar,
   Alert,
   TextField,
 } from "@mui/material";
-import AssignmentIcon from "@mui/icons-material/Assignment";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import DeleteIcon from "@mui/icons-material/Delete";
-import InfoIcon from "@mui/icons-material/Info";
+
 
 const API_BASE_URL = "http://localhost:5000/api";
 
@@ -520,20 +513,7 @@ const EmployeeDocumentUpload = () => {
         <Box>
           {selectedTask && (
             <Paper sx={{ p: 4, mb: 4 }}>
-              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-                <Typography variant="h5">
-                  {selectedTask.title || getProcessLabel(selectedTask.processType)}
-                </Typography>
-                <IconButton 
-                  color="primary" 
-                  onClick={() => setDetailsDialogOpen(true)}
-                  size="small"
-                >
-                  <InfoIcon />
-                </IconButton>
-              </Box>
-
-              <Box sx={{ mb: 4 }}>
+             <Box sx={{ mb: 4 }}>
                 <Typography variant="subtitle1" gutterBottom>
                   Documents Upload Progress
                 </Typography>
@@ -759,54 +739,7 @@ const EmployeeDocumentUpload = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-   
-      <Dialog open={detailsDialogOpen} onClose={() => setDetailsDialogOpen(false)} maxWidth="md">
-        <DialogTitle>
-          {selectedTask?.title || (selectedTask && getProcessLabel(selectedTask.processType))}
-        </DialogTitle>
-        <DialogContent>
-          {selectedTask && (
-            <>
-              <Typography variant="subtitle1" gutterBottom>
-                Task Details
-              </Typography>
-              <Typography variant="body2" paragraph>
-                <strong>Process Type:</strong> {getProcessLabel(selectedTask.processType)}
-              </Typography>
-              <Typography variant="body2" paragraph>
-                <strong>Status:</strong> {selectedTask.status.charAt(0).toUpperCase() + selectedTask.status.slice(1)}
-              </Typography>
-              <Typography variant="body2" paragraph>
-                <strong>Due Date:</strong>{" "}
-                {selectedTask.dueDate
-                  ? new Date(selectedTask.dueDate).toLocaleDateString()
-                  : "No due date specified"}
-              </Typography>
-              {selectedTask.description && (
-                <Typography variant="body2" paragraph>
-                  <strong>Description:</strong> {selectedTask.description}
-                </Typography>
-              )}
-              {selectedTask.instructions && (
-                <>
-                  <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-                    Instructions
-                  </Typography>
-                  <Typography variant="body2" paragraph>
-                    {selectedTask.instructions}
-                  </Typography>
-                </>
-              )}
-            </>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDetailsDialogOpen(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Snackbar
+  <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}

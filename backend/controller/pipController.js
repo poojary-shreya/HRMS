@@ -50,11 +50,11 @@ export const getPlans = async (req, res) => {
     if (req.query.employee_id) {
       whereCondition.employee_id = req.query.employee_id;
     }
-    if (!req.session.isCompanyEmail) {
-      return res.status(403).json({ 
-        message: "Access denied: failed to submit can only be accessed when logged in with company email" 
-      });
-    }
+    // if (!req.session.isCompanyEmail) {
+    //   return res.status(403).json({ 
+    //     message: "Access denied: failed to submit can only be accessed when logged in with company email" 
+    //   });
+    // }
 
     const plans = await ImprovementPlan.findAll({
       where: whereCondition,

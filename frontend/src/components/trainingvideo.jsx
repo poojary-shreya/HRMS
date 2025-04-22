@@ -5,7 +5,7 @@ import {
   Container, Card, CardContent, Typography, TextField, Button, Grid, Box,
   FormControl, InputLabel, MenuItem, Select, Alert, Table, TableBody,
   TableCell, TableContainer, TableHead, TableRow, Paper, IconButton,
-  Dialog, DialogTitle, DialogContent, DialogActions, Chip
+  Dialog, DialogTitle, DialogContent, DialogActions, Chip,Tooltip
 } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -187,7 +187,7 @@ function TrainingVideoManagement() {
       <Card sx={{ mb: 4, boxShadow: 3 }}>
         <CardContent>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-            <Typography variant="h5" component="h2">
+            <Typography variant="h5" component="h2" >
               Training Video Management
             </Typography>
             <Button
@@ -284,6 +284,7 @@ function TrainingVideoManagement() {
         <DialogContent dividers>
           <Grid container spacing={2}>
             <Grid item xs={12}>
+            <Tooltip title="Enter the full title of the training video" placement="top" arrow>
               <TextField
                 fullWidth
                 label="Video Title"
@@ -292,20 +293,24 @@ function TrainingVideoManagement() {
                 onChange={handleChange}
                 required
               />
+              </Tooltip>
             </Grid>
             <Grid item xs={12}>
+            <Tooltip title="Paste the complete YouTube URL (e.g., https://youtu.be/skqJ8n3EIjc)" placement="top" arrow>
               <TextField
                 fullWidth
-                label="YouTube Video URL"
+                label=" Video URL"
                 name="videoUrl"
                 value={videoForm.videoUrl}
                 onChange={handleChange}
                 placeholder="https://youtu.be/skqJ8n3EIjc"
-                helperText="Enter the full YouTube URL"
+                helperText="Enter the full  URL"
                 required
               />
+              </Tooltip>
             </Grid>
             <Grid item xs={12} md={6}>
+            <Tooltip title="Select the main category this video belongs to" placement="top" arrow>
               <FormControl fullWidth required>
                 <InputLabel>Skill Category</InputLabel>
                 <Select
@@ -321,8 +326,10 @@ function TrainingVideoManagement() {
                   ))}
                 </Select>
               </FormControl>
+              </Tooltip>
             </Grid>
             <Grid item xs={12} md={6}>
+            <Tooltip title="Select the specific skill content covered in this video" placement="top" arrow>
               <FormControl fullWidth required>
                 <InputLabel>Skill Content</InputLabel>
                 <Select
@@ -339,8 +346,10 @@ function TrainingVideoManagement() {
                   ))}
                 </Select>
               </FormControl>
+              </Tooltip>
             </Grid>
             <Grid item xs={12}>
+            <Tooltip title="Add any additional information about the video content or learning objectives" placement="top" arrow>
               <TextField
                 fullWidth
                 label="Description (Optional)"
@@ -350,6 +359,7 @@ function TrainingVideoManagement() {
                 multiline
                 rows={3}
               />
+              </Tooltip>
             </Grid>
           </Grid>
         </DialogContent>

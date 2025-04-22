@@ -1,22 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import CloseIcon from "@mui/icons-material/Close";
-import InfoIcon from "@mui/icons-material/Info";
 import { useLocation } from "react-router-dom";
-import { 
-  Container, 
-  TextField, 
-  Button, 
-  Typography, 
-  Paper, 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  IconButton, 
-  Box, 
-  Grid,
-  Tooltip
-} from "@mui/material";
+import { Container, TextField, Button, Typography, Paper, Dialog, DialogTitle, DialogContent, IconButton, Box, Grid, Tooltip } from "@mui/material";
 
 const UploadSalary = () => {
   const [employeeId, setEmployeeId] = useState("");
@@ -40,7 +26,7 @@ const UploadSalary = () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/employees/${employeeId}`);
       setEmployeeDetails(res.data.data);
-      setOpen(false); 
+      setOpen(false); // Automatically close dialog after successful fetch
     } catch (error) {
       console.error("Error fetching employee details:", error);
       alert("Employee not found");
@@ -69,13 +55,13 @@ const UploadSalary = () => {
     const joiningBonusValue = parseFloat(joiningBonus) || 0;
     const variableSalaryValue = parseFloat(variableSalary) || 0;
     
-
+    // Calculate taxable income
     const deduction = pf + (professional_tax * 12);
     const taxable_income = base_salary + hra + medical_allowance + newspaper_allowance + 
                           dress_allowance + other_allowance + joiningBonusValue + 
                           variableSalaryValue - deduction;
     
- 
+    // Calculate tax
     let total_tax = 0;
     if (taxable_income > 1200000) {
       total_tax += (taxable_income - 1200000) * 0.3 + 400000 * 0.2 + 400000 * 0.05;
@@ -85,7 +71,7 @@ const UploadSalary = () => {
       total_tax += (taxable_income - 400000) * 0.05;
     }
     
-    total_tax += total_tax * 0.04; 
+    total_tax += total_tax * 0.04; // 4% cess
     const monthly_tax = total_tax / 12;
     
     setSalaryDetails({
@@ -179,7 +165,7 @@ const UploadSalary = () => {
       {!open && !employeeDetails && (
         <Box display="flex" justifyContent="left" mt={3} ml={3}>
           <Button variant="contained" color="primary" onClick={() => setOpen(true)}>
-            Fetch Payslip
+            upload CTC
           </Button>
         </Box>
       )}
@@ -199,13 +185,6 @@ const UploadSalary = () => {
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
             margin="normal"
-            InputProps={{
-              endAdornment: (
-                <Tooltip title="Enter the employee's ID to fetch their details" placement="top">
-                  <InfoIcon fontSize="small" sx={{ color: "#AAAAAA" }} />
-                </Tooltip>
-              ),
-            }}
           />
           <Box display="flex" justifyContent="center" mt={3} gap={2}>
             <Button variant="contained" color="primary" onClick={fetchEmployeeDetails}>
@@ -239,90 +218,37 @@ const UploadSalary = () => {
                   <TextField fullWidth label="City" variant="outlined" value={employeeDetails.city} InputProps={{ readOnly: true }} />
                 </Grid>
                 <Grid item xs={6}>
-                  <TextField 
-                    fullWidth 
-                    label="PF Number" 
-                    variant="outlined" 
-                    value={pfno} 
-                    onChange={(e) => setPfno(e.target.value)} 
-                    required 
-                    InputProps={{
-                      endAdornment: (
-                        <Tooltip title="Enter Provident Fund number of the employee" placement="top">
-                          <InfoIcon fontSize="small" sx={{ color: "#AAAAAA" }} />
-                        </Tooltip>
-                      ),
-                    }}
-                  />
+                  <Tooltip title="enter the PF number of the employee" placement="top" arrow>
+                  <TextField fullWidth label="PF Number" variant="outlined" value={pfno} onChange={(e) => setPfno(e.target.value)} required /></Tooltip>
                 </Grid>
                 <Grid item xs={6}>
-                  <TextField 
-                    fullWidth 
-                    label="UAN" 
-                    variant="outlined" 
-                    value={uan} 
-                    onChange={(e) => setUan(e.target.value)} 
-                    required 
-                    InputProps={{
-                      endAdornment: (
-                        <Tooltip title="Enter Universal Account Number of the employee" placement="top">
-                          <InfoIcon fontSize="small" sx={{ color: "#AAAAAA" }} />
-                        </Tooltip>
-                      ),
-                    }}
-                  />
+                <Tooltip title="enter the UAN number of the employee" placement="top" arrow>
+                  <TextField fullWidth label="UAN" variant="outlined" value={uan} onChange={(e) => setUan(e.target.value)} required /></Tooltip>
                 </Grid>
                 <Grid item xs={12}>
-                  <TextField 
-                    fullWidth 
-                    label="Enter CTC" 
-                    variant="outlined" 
-                    type="number" 
-                    value={ctc} 
-                    onChange={handleCtcChange} 
-                    required 
-                    InputProps={{
-                      endAdornment: (
-                        <Tooltip title="Enter the annual Cost to Company in INR. This will be used to calculate all salary components." placement="top">
-                          <InfoIcon fontSize="small" sx={{ color: "#AAAAAA" }} />
-                        </Tooltip>
-                      ),
-                    }}
-                  />
+                <Tooltip title="enter the CTC of the employee" placement="top" arrow>
+                  <TextField fullWidth label="Enter CTC" variant="outlined" type="number" value={ctc} onChange={handleCtcChange} required /></Tooltip>
                 </Grid>
                 <Grid item xs={6}>
-                  <TextField 
-                    fullWidth 
-                    label="Joining Bonus" 
-                    variant="outlined" 
-                    type="number" 
-                    value={joiningBonus} 
-                    onChange={handleJoiningBonusChange} 
-                    InputProps={{
-                      endAdornment: (
-                        <Tooltip title="Enter one-time joining bonus amount, if applicable" placement="top">
-                          <InfoIcon fontSize="small" sx={{ color: "#AAAAAA" }} />
-                        </Tooltip>
-                      ),
-                    }}
-                  />
+                <Tooltip title="enter the Joining bonus amount of the employee (if applicable else enter zero to the field)" placement="top" arrow>
+                  <TextField fullWidth label="Joining Bonus" variant="outlined" type="number" value={joiningBonus} onChange={handleJoiningBonusChange} required
+                  inputProps={{
+                    min: "0",
+                    step: "1",
+                    pattern: "[0-9]*"
+                  }}
+                   />
+                   </Tooltip>
                 </Grid>
                 <Grid item xs={6}>
-                  <TextField 
-                    fullWidth 
-                    label="Variable Salary" 
-                    variant="outlined" 
-                    type="number" 
-                    value={variableSalary} 
-                    onChange={handleVariableSalaryChange} 
-                    InputProps={{
-                      endAdornment: (
-                        <Tooltip title="Enter the annual variable pay component of the salary" placement="top">
-                          <InfoIcon fontSize="small" sx={{ color: "#AAAAAA" }} />
-                        </Tooltip>
-                      ),
-                    }}
-                  />
+                <Tooltip title="enter the Variable pay amount of the employee (if applicable else enter zero to the field)" placement="top" arrow>
+                  <TextField fullWidth label="Variable Salary" variant="outlined" type="number" value={variableSalary} onChange={handleVariableSalaryChange} required
+                  inputProps={{
+                    min: "0",
+                    step: "1",
+                    pattern: "[0-9]*"
+                  }}
+                   /></Tooltip>
                 </Grid>
               </Grid>
             </>
@@ -330,12 +256,7 @@ const UploadSalary = () => {
 
           {salaryDetails && (
             <Paper sx={{ mt: 3, p: 2, backgroundColor: "#e3f2fd" }}>
-              <Typography variant="h6">
-                Salary Breakdown
-                <Tooltip title="Calculated breakdown of salary components based on the entered CTC" placement="top">
-                  <InfoIcon fontSize="small" sx={{ ml: 1, color: "#AAAAAA" }} />
-                </Tooltip>
-              </Typography>
+              <Typography variant="h6">Salary Breakdown</Typography>
               <Grid container spacing={2}>
                 <Grid item xs={6}>
                   <Typography><strong>Base Salary:</strong> ₹{salaryDetails.base_salary.toFixed(2)}</Typography>
@@ -371,26 +292,15 @@ const UploadSalary = () => {
                     <Typography><strong>Variable Salary:</strong> ₹{salaryDetails.variable_salary.toFixed(2)}</Typography>
                   </Grid>
                 )}
-                <Grid item xs={12}>
-                  <Typography><strong>Taxable Income:</strong> ₹{salaryDetails.taxable_income.toFixed(2)}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography><strong>Total Tax:</strong> ₹{salaryDetails.total_tax.toFixed(2)}</Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography><strong>Monthly Tax:</strong> ₹{salaryDetails.monthly_tax.toFixed(2)}</Typography>
-                </Grid>
               </Grid>
             </Paper>
           )}
 
           {salaryDetails && (
             <Box textAlign="center">
-              <Tooltip title="Submit this payroll information to the system" placement="top">
-                <Button variant="contained" color="primary" sx={{ mt: 3 }} onClick={submitPayroll}>
-                  Submit Payroll
-                </Button>
-              </Tooltip>
+              <Button variant="contained" color="primary" sx={{ mt: 3 }} onClick={submitPayroll}>
+                Submit Payroll
+              </Button>
             </Box>
           )}
         </Paper>

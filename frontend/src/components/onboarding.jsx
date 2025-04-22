@@ -196,13 +196,14 @@ const OnboardingForm = () => {
       <Box sx={{ maxWidth: 1500, mt: 3, boxShadow: 3, mx: 3 }}>
         <Card>
           <Typography variant="h4" gutterBottom align="center" fontWeight="bold" sx={{ pt: 2 }}>
-            Assign Onboarding Process
+            Onboarding Process
           </Typography>
           <CardContent>
             <form onSubmit={handleSubmit} encType="multipart/form-data">
             
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
+                <Tooltip title="Enter the unique ID assigned to the hiring manager or HR personnel creating this onboarding process" arrow placement="top">
                   <TextField
                     label="Employee ID"
                     value={onboarding.employee_id}
@@ -213,13 +214,10 @@ const OnboardingForm = () => {
                     required
                     margin="normal"
                     InputProps={{
-                      endAdornment: (
-                        <Tooltip title="Enter the unique ID assigned to the hiring manager or HR personnel creating this onboarding process">
-                          <InfoIcon fontSize="small" />
-                        </Tooltip>
-                      ),
+                    
                     }}
                   />
+                  </Tooltip>
                 </Grid>
 
                 <Grid item xs={12} sm={6}>
@@ -264,11 +262,7 @@ const OnboardingForm = () => {
                     InputLabelProps={{ shrink: true }}
                     margin="normal"
                     InputProps={{
-                      endAdornment: (
-                        <Tooltip title="The deadline by which the candidate must complete all onboarding tasks">
-                           <InfoIcon fontSize="small" />
-                        </Tooltip>
-                      ),
+                    
                     }}
                   />
                 </Grid>
@@ -276,6 +270,7 @@ const OnboardingForm = () => {
 
               <Grid container spacing={2}>
                 <Grid item xs={12}>
+                <Tooltip title="Select the specific onboarding stage to assign to this candidate " arrow placement="top">
                   <FormControl fullWidth required margin="normal">
                     <InputLabel>Onboarding Process</InputLabel>
                     <Select
@@ -284,11 +279,7 @@ const OnboardingForm = () => {
                       onChange={(e) =>
                         setOnboarding((prev) => ({ ...prev, onboardingProcess: e.target.value }))
                       }
-                      endAdornment={
-                        <Tooltip title="Select the specific onboarding stage to assign to this candidate">
-                         <InfoIcon fontSize="small" />
-                        </Tooltip>
-                      }
+                   
                     >
                       <MenuItem value="document-verification">Document Verification</MenuItem>
                       <MenuItem value="training">Mandatory Training</MenuItem>
@@ -296,9 +287,10 @@ const OnboardingForm = () => {
                       <MenuItem value="complete-onboarding">Complete Onboarding Process</MenuItem>
                     </Select>
                   </FormControl>
+                  </Tooltip>
                 </Grid>
               </Grid>
-
+              <Tooltip title="Add specific instructions, meeting links, or detailed requirements for the candidate to complete this stage" arrow placement="top">
               <TextField
                 label="Process Details"
                 value={onboarding.processDetails}
@@ -312,15 +304,12 @@ const OnboardingForm = () => {
                 rows={3}
                 placeholder="Provide details about what the candidate needs to do"
                 InputProps={{
-                  endAdornment: (
-                    <Tooltip title="Add specific instructions, meeting links, or detailed requirements for the candidate to complete this stage">
-                      <InfoIcon fontSize="small" />
-                    </Tooltip>
-                  ),
+                 
                 }}
               />
-
+</Tooltip>
               <Grid item xs={12}>
+              <Tooltip title="Select all documents that the candidate must submit. They will receive an email with this checklist." arrow placement="top">
                 <FormControl fullWidth margin="normal" required>
                   <InputLabel>Required Documents</InputLabel>
                   <Select
@@ -331,11 +320,7 @@ const OnboardingForm = () => {
                     renderValue={(selected) => selected.map(value => 
                       documentOptions.find(option => option.value === value)?.label
                     ).join(', ')}
-                    endAdornment={
-                      <Tooltip title="Select all documents that the candidate must submit. They will receive an email with this checklist.">
-                         <InfoIcon fontSize="small" />
-                      </Tooltip>
-                    }
+                  
                   >
                     {documentOptions.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
@@ -344,9 +329,9 @@ const OnboardingForm = () => {
                     ))}
                   </Select>
                 </FormControl>
-
+</Tooltip>
                 <Box sx={{ mt: 2 }}>
-                  <Tooltip title="Upload any reference materials or templates that the candidate will need to complete this process">
+                  <Tooltip title="Upload any reference materials or templates that the candidate will need to complete this process" arrow placement="top">
                     <Button variant="outlined" component="label">
                       Upload Additional Files
                       <input type="file" hidden onChange={handleFileChange} multiple />

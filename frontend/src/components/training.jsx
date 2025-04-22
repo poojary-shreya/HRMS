@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import {
   Container, Card, CardContent, Typography, TextField, Button, Grid, Box,
-  FormControl, InputLabel, MenuItem, Select, Alert
+  FormControl, InputLabel, MenuItem, Select, Alert,Tooltip
 } from "@mui/material";
 
 function TrainingManagement() {
@@ -187,6 +187,7 @@ function TrainingManagement() {
 
             <Grid container spacing={2}>
               <Grid item xs={6}>
+              <Tooltip title="Select the main category of skills this training covers" arrow placement="top">
                 <FormControl fullWidth margin="normal">
                   <InputLabel>Skill Category</InputLabel>
                   <Select
@@ -202,9 +203,11 @@ function TrainingManagement() {
                     ))}
                   </Select>
                 </FormControl>
+                </Tooltip>
               </Grid>
 
               <Grid item xs={6}>
+              <Tooltip title="Select the specific content area within the chosen skill category" arrow placement="top">
                 <FormControl fullWidth margin="normal">
                   <InputLabel>Skill Content</InputLabel>
                   <Select
@@ -221,6 +224,7 @@ function TrainingManagement() {
                     ))}
                   </Select>
                 </FormControl>
+                </Tooltip>
               </Grid>
             </Grid>
 

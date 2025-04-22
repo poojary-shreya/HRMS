@@ -67,7 +67,7 @@ const PayrollTax = () => {
       const payrollResponse = await axios.get(`http://localhost:5000/api/tax/salary/${payrollId}`);
       let payrollData = payrollResponse.data.data;
   
-    
+      // Initialize all document-related values with defaults
       let updatedHra = 0;
       let updateMedical = 0;
       let updateNewspaper = 0;
@@ -84,7 +84,7 @@ const PayrollTax = () => {
       let section80EEB = 0;
       
       try {
-      
+        // Attempt to fetch documents, but don't fail if there aren't any
         const documentResponse = await axios.get("http://localhost:5000/api/employee/status/documents");
         console.log(documentResponse);
         
@@ -94,11 +94,11 @@ const PayrollTax = () => {
       
           const employeeId = payrollData.personal?.employee_id;
       
-        
+          // Only filter documents if the employee ID exists and documents array is valid
           if (employeeId && documents.length > 0) {
             const employeeDocuments = documents.filter(doc => doc.employee_id === employeeId) || [];
           
-           
+            // Only try to find documents if there are any for this employee
             if (employeeDocuments.length > 0) {
               updatedHra = employeeDocuments.find(doc => doc.category?.toLowerCase() === "hra")?.claimed_amount || 0;
               updateMedical = employeeDocuments.find(doc => doc.category?.toLowerCase() === "medical_allowance")?.claimed_amount || 0;
@@ -145,6 +145,7 @@ const PayrollTax = () => {
           }
         }
       } catch (docError) {
+        // If document fetching fails, we'll continue with default values (zeroes)
         console.error("Error fetching documents, proceeding with default values", docError);
       }
   
@@ -290,6 +291,9 @@ const PayrollTax = () => {
               margin="normal"
               onChange={handleChange}
               required
+              inputProps={{
+                pattern: "[0-9]*"
+              }}
             />
             </Grid>
             <Grid item xs={6}>
@@ -301,6 +305,9 @@ const PayrollTax = () => {
               value={formData.section80C_investment}
               onChange={handleChange}
               required
+              InputProps={{
+                readOnly: true,
+              }}
             />
             </Grid>
             <Grid item xs={6}>
@@ -312,6 +319,9 @@ const PayrollTax = () => {
               value={formData.section80CCC_investment}
               onChange={handleChange}
               required
+              InputProps={{
+                readOnly: true,
+              }}
             />
             </Grid>
             <Grid item xs={6}>
@@ -322,6 +332,9 @@ const PayrollTax = () => {
               margin="normal"
               value={formData.section80D}
               onChange={handleChange}
+              InputProps={{
+                readOnly: true,
+              }}
               required
             />
             </Grid><Grid item xs={6}>
@@ -332,6 +345,9 @@ const PayrollTax = () => {
               margin="normal"
               value={formData.section80CCD_1B}
               onChange={handleChange}
+              InputProps={{
+                readOnly: true,
+              }}
               required
             />
             </Grid><Grid item xs={6}>
@@ -342,6 +358,9 @@ const PayrollTax = () => {
               margin="normal"
               value={formData.section80CCD_2}
               onChange={handleChange}
+              InputProps={{
+                readOnly: true,
+              }}
               required
             />
             </Grid><Grid item xs={6}>
@@ -352,6 +371,9 @@ const PayrollTax = () => {
               margin="normal"
               value={formData.section24_b}
               onChange={handleChange}
+              InputProps={{
+                readOnly: true,
+              }}
               required
             />
             </Grid><Grid item xs={6}>
@@ -362,6 +384,9 @@ const PayrollTax = () => {
               margin="normal"
               value={formData.section80E}
               onChange={handleChange}
+              InputProps={{
+                readOnly: true,
+              }}
               required
             />
             </Grid>
@@ -373,6 +398,9 @@ const PayrollTax = () => {
               margin="normal"
               value={formData.section80EEB}
               onChange={handleChange}
+              InputProps={{
+                readOnly: true,
+              }}
               required
             />
             </Grid>
@@ -384,6 +412,9 @@ const PayrollTax = () => {
               margin="normal"
               value={formData.otherInvestment}
               onChange={handleChange}
+              InputProps={{
+                readOnly: true,
+              }}
               required
             />
             </Grid>

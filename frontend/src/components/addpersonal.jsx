@@ -12,7 +12,11 @@ import {
   Grid,
   Box,
   Paper,
+  FormHelperText,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
+import InfoIcon from "@mui/icons-material/Info";
 
 const Addpersonal = () => {
   const navigate = useNavigate();
@@ -20,14 +24,19 @@ const Addpersonal = () => {
   const { id } = useParams(); 
   const isEditMode = !!id || location.state?.isEdit;
   
+
+  const [errors, setErrors] = useState({});
+  const [previewUrl, setPreviewUrl] = useState(null);
+  
   const [formData, setFormData] = useState({
     employmentStatus: "Active",
-    company_registration_no:"12345",
+    company_registration_no: "12345",
+    personalPhoto: null,
 
     personalDetails: {
       firstName: "",
       lastName: "",
-      personalemail:"",
+      personalemail: "",
       dateOfBirth: "",
       anniversary: "",
       gender: "",
@@ -56,8 +65,64 @@ const Addpersonal = () => {
     nominations: [{ name: "", relationship: "", age: "" }],
     qualifications: [{ degree: "", institution: "", year: "", file: null }],
     certificates: [{ name: "", issuedBy: "", date: "", file: null }],
-
   });
+
+  const validatePAN = (pan) => {
+    const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+    return panRegex.test(pan);
+  };
+
+  const validateAadhar = (aadhar) => {
+    const aadharRegex = /^\d{12}$/;
+    return aadharRegex.test(aadhar);
+  };
+
+
+  const validatePhone = (phone) => {
+    const phoneRegex = /^\d{10}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const validatePinCode = (pincode) => {
+    const pincodeRegex = /^\d{6}$/;
+    return pincodeRegex.test(pincode);
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+   
+ 
+    if (!formData.personalDetails.panNumber) {
+      newErrors.panNumber = "PAN Number is required";
+    } else if (!validatePAN(formData.personalDetails.panNumber)) {
+      newErrors.panNumber = "Invalid PAN format (e.g., ABCDE1234F)";
+    }
+
+    if (!formData.personalDetails.adharCardNumber) {
+      newErrors.adharCardNumber = "Aadhar Number is required";
+    } else if (!validateAadhar(formData.personalDetails.adharCardNumber)) {
+      newErrors.adharCardNumber = "Invalid Aadhar format (12 digits)";
+    }
+
+  if (!validatePhone(formData.contactInfo.phoneNumber)) {
+      newErrors.phoneNumber = "Valid 10-digit phone number is required";
+    }
+
+   
+
+    if (!validatePinCode(formData.contactInfo.pinCode)) {
+      newErrors.pinCode = "Valid 6-digit pin code is required";
+    }
+
+   
+    if (!validatePhone(formData.emergencyContact.mobile)) {
+      newErrors.emergencyMobile = "Valid 10-digit mobile number is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleDirectChange = (e, field) => {
     setFormData((prev) => ({
@@ -85,13 +150,30 @@ const Addpersonal = () => {
   };
 
   const handleFileUpload = (e, section, key) => {
-    setFormData((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [key]: e.target.files[0],
-      },
-    }));
+    const file = e.target.files[0];
+    if (file) {
+      setFormData((prev) => ({
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [key]: file,
+        },
+      }));
+    }
+  };
+
+  const handlePersonalPhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+     
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      
+      setFormData((prev) => ({
+        ...prev,
+        personalPhoto: file,
+      }));
+    }
   };
 
   const handleArrayFileUpload = (section, index, field) => (event) => {
@@ -112,8 +194,6 @@ const Addpersonal = () => {
     }));
   };
 
-  
-
   useEffect(() => {
     const fetchEmployeeData = async () => {
       const editId = id || location.state?.employee_id;
@@ -125,9 +205,10 @@ const Addpersonal = () => {
           if (data.success) {
             const employeeData = data.data;
             setFormData({
-              employee_id:editId,
+              employee_id: editId,
               employmentStatus: employeeData.employmentStatus,
-              company_registration_no:employeeData.company_registration_no,
+              company_registration_no: employeeData.company_registration_no,
+              personalPhoto: null,
               personalDetails: {
                 firstName: employeeData.firstName,
                 lastName: employeeData.lastName,
@@ -148,7 +229,7 @@ const Addpersonal = () => {
                 pinCode: employeeData.pinCode
               },
               emergencyContact: {
-                mobile:employeeData.mobile,
+                mobile: employeeData.mobile,
                 landline: employeeData.landline,
               },
               insurance: {
@@ -159,6 +240,11 @@ const Addpersonal = () => {
               qualifications: employeeData.qualifications || [{ degree: "", institution: "", year: "", file: null }],
               certificates: employeeData.certificates || [{ name: "", issuedBy: "", date: "", file: null }]
             });
+            
+           
+            if (employeeData.personalPhotoUrl) {
+              setPreviewUrl(employeeData.personalPhotoUrl);
+            }
           }
         } catch (error) {
           console.error("Fetch error:", error);
@@ -173,14 +259,23 @@ const Addpersonal = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+ 
+    if (!validateForm()) {
+      window.scrollTo(0, 0); 
+      return;
+    }
+    
     try {
       const formDataToSend = new FormData();
       const editId = id || location.state?.employee_id;
   
-   
       formDataToSend.append("employmentStatus", formData.employmentStatus);
       formDataToSend.append("company_registration_no", formData.company_registration_no);
 
+   
+      if (formData.personalPhoto) {
+        formDataToSend.append("personalPhoto", formData.personalPhoto);
+      }
       
       formDataToSend.append("personalDetails", JSON.stringify(formData.personalDetails));
       formDataToSend.append("contactInfo", JSON.stringify(formData.contactInfo));
@@ -221,7 +316,7 @@ const Addpersonal = () => {
       });
   
       if (response.data.success) {
-        const {employee_id, companyemail}=response.data.data;
+        const {employee_id, companyemail} = response.data.data;
         alert(isEditMode ? "Updated successfully!" : `Employee added successfully!\nEmployeeId: ${employee_id}\nCompanyEmail: ${companyemail}`);
         navigate("/addfinancial", { 
           state: { 
@@ -235,227 +330,575 @@ const Addpersonal = () => {
       alert(`Error: ${error.response?.data?.message || error.message}`);
     }
   };
+
+  const FieldTooltip = ({ title }) => (
+    <Tooltip title={title} arrow placement="top">
+      <IconButton size="small" sx={{ color: 'gray', ml: 1 }}>
+        <InfoIcon fontSize="small" />
+      </IconButton>
+    </Tooltip>
+  );
+
   return (
     <Box sx={{ maxWidth: 1500, margin: 'auto', padding: 3 }}>
       <Typography variant="h4" gutterBottom align="center" fontWeight="bold">
-        {isEditMode ? "Edit  Personal Details" : "Add  Personal Details"}
+        {isEditMode ? "Edit Personal Details" : "Add Personal Details"}
       </Typography>
 
       <Paper elevation={3} sx={{ padding: 3, marginBottom: 3 }}>
         <Grid container spacing={2}>
-        {isEditMode && (
-      <Grid item xs={6}>
-        <TextField 
-          label="Employee ID" 
-          fullWidth 
-          value={formData.employee_id || ''}
-          disabled={true}
-        />
-      </Grid>
-    )}
-    <Grid item xs={isEditMode ? 6 : 12}>
-      <FormControl fullWidth>
-        <InputLabel>Employment Status</InputLabel>
-        <Select
-          label="Employment Status"
-          value={formData.employmentStatus}
-          onChange={(e) => handleDirectChange(e, 'employmentStatus')}
-          required>
-          <MenuItem value="Active">Active</MenuItem>
-          <MenuItem value="Resigned">Resigned</MenuItem>
-          <MenuItem value="Deceased">Deceased</MenuItem>
-        </Select>
-      </FormControl>
-    </Grid>
-          {/* <Grid item xs={12}>
-            <TextField 
-              label="Company Registration No" 
-              fullWidth 
-              value={formData.company_registration_no}
-              onChange={(e) => handleDirectChange(e, 'company_registration_no')}
-              required 
-              disabled={isEditMode}
-            />
-          </Grid> */}
-        </Grid>
-      </Paper>
-
-      <Paper elevation={3} sx={{ padding: 3, marginBottom: 3 }}>
-        <Typography variant="h6" gutterBottom>Personal Details</Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={6}><TextField label="First Name" fullWidth value={formData.personalDetails.firstName} onChange={(e) => handleChange(e, 'personalDetails', 'firstName')} required /></Grid>
-          <Grid item xs={6}><TextField label="Last Name" fullWidth value={formData.personalDetails.lastName} onChange={(e) => handleChange(e, 'personalDetails', 'lastName')} required /></Grid>
-          <Grid item xs={6}><TextField label="Email" fullWidth value={formData.personalDetails.personalemail} onChange={(e) => handleChange(e, 'personalDetails', 'personalemail')} required /></Grid>
-          <Grid item xs={6}><TextField label="Date of Birth" type="date" fullWidth value={formData.personalDetails.dateOfBirth} InputLabelProps={{ shrink: true }} onChange={(e) => handleChange(e, 'personalDetails', 'dateOfBirth')} required /></Grid>
-          <Grid item xs={6}><TextField label="Anniversary" type="date" fullWidth value={formData.personalDetails.anniversary} InputLabelProps={{ shrink: true }} onChange={(e) => handleChange(e, 'personalDetails', 'anniversary')} /></Grid>
-          <Grid item xs={6}>
+          {isEditMode && (
+            <Grid item xs={6}>
+              <TextField 
+                label="Employee ID" 
+                fullWidth 
+                value={formData.employee_id || ''}
+                disabled={true}
+              />
+            </Grid>
+          )}
+          <Grid item xs={isEditMode ? 6 : 12}>
             <FormControl fullWidth>
-              <InputLabel>Gender</InputLabel>
+              <InputLabel>Employment Status</InputLabel>
               <Select
-                label="Gender"
-                value={formData.personalDetails.gender}
-                onChange={(e) => handleChange(e, 'personalDetails', 'gender')}
-              >
-                <MenuItem value="male">Male</MenuItem>
-                <MenuItem value="female">Female</MenuItem>
-                <MenuItem value="other">Other</MenuItem>
+                label="Employment Status"
+                value={formData.employmentStatus}
+                onChange={(e) => handleDirectChange(e, 'employmentStatus')}
+                required>
+                <MenuItem value="Active">Active</MenuItem>
+                <MenuItem value="Resigned">Resigned</MenuItem>
+                <MenuItem value="Deceased">Deceased</MenuItem>
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={6}><TextField label="PAN Card Number" fullWidth value={formData.personalDetails.panNumber} onChange={(e) => handleChange(e, 'personalDetails', 'panNumber')} required /></Grid>
+        </Grid>
+      </Paper>
+      <Paper elevation={3} sx={{ padding: 3, marginBottom: 3 }}>
+  <Typography variant="h6" gutterBottom>
+    Personal Details
+    <FieldTooltip title="Basic personal information of the employee" />
+  </Typography>
+  
+  <Grid container spacing={2} sx={{ mb: 3 }}>
+    <Grid item xs={12} md={9}>
+      <Grid container spacing={2}>
+        <Grid item xs={6}>
+          <TextField 
+            label="First Name" 
+            fullWidth 
+            value={formData.personalDetails.firstName} 
+            onChange={(e) => handleChange(e, 'personalDetails', 'firstName')} 
+            required 
+            error={!!errors.firstName}
+            helperText={errors.firstName}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <TextField 
+            label="Last Name" 
+            fullWidth 
+            value={formData.personalDetails.lastName} 
+            onChange={(e) => handleChange(e, 'personalDetails', 'lastName')} 
+            required 
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <TextField 
+            label="Email" 
+            fullWidth 
+            value={formData.personalDetails.personalemail} 
+            onChange={(e) => handleChange(e, 'personalDetails', 'personalemail')} 
+            required 
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <FormControl fullWidth error={!!errors.gender}>
+            <InputLabel>Gender</InputLabel>
+            <Select
+              label="Gender"
+              value={formData.personalDetails.gender}
+              onChange={(e) => handleChange(e, 'personalDetails', 'gender')}
+              required
+            >
+              <MenuItem value="male">Male</MenuItem>
+              <MenuItem value="female">Female</MenuItem>
+              <MenuItem value="other">Other</MenuItem>
+            </Select>
+            {errors.gender && <FormHelperText>{errors.gender}</FormHelperText>}
+          </FormControl>
+        </Grid>
+      </Grid>
+    </Grid>
+    
+    <Grid item xs={12} md={3} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
+      <Typography variant="subtitle1" gutterBottom>
+        Personal Photo
+        <FieldTooltip title="Upload a passport-sized photo (JPEG/PNG, max 2MB)" />
+      </Typography>
+      <Box 
+        sx={{ 
+          width: 120, 
+          height: 120, 
+          border: '1px dashed grey', 
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          mb: 2,
+          position: 'relative'
+        }}
+      >
+        {previewUrl ? (
+          <img 
+            src={previewUrl} 
+            alt="Profile Preview" 
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          />
+        ) : (
+          <Typography variant="body2" color="textSecondary">
+            No Photo
+          </Typography>
+        )}
+      </Box>
+      <input
+        accept="image/*"
+        style={{ display: 'none' }}
+        id="photo-upload"
+        type="file"
+        onChange={handlePersonalPhotoUpload}
+      />
+      <label htmlFor="photo-upload">
+        <Button variant="outlined" component="span" size="small">
+          {previewUrl ? 'Change Photo' : 'Upload Photo'}
+        </Button>
+      </label>
+    </Grid>
+  </Grid>
+  
+  <Grid container spacing={2}>
+    <Grid item xs={6}>
+      <TextField 
+        label="Date of Birth" 
+        type="date" 
+        fullWidth 
+        value={formData.personalDetails.dateOfBirth} 
+        InputLabelProps={{ shrink: true }} 
+        onChange={(e) => handleChange(e, 'personalDetails', 'dateOfBirth')} 
+        required 
+        error={!!errors.dateOfBirth}
+        helperText={errors.dateOfBirth}
+      />
+    </Grid>
+    <Grid item xs={6}>
+      <TextField 
+        label="Anniversary" 
+        type="date" 
+        fullWidth 
+        value={formData.personalDetails.anniversary} 
+        InputLabelProps={{ shrink: true }} 
+        onChange={(e) => handleChange(e, 'personalDetails', 'anniversary')} 
+      />
+    </Grid>
+   
+    <Grid item xs={12}>
+      <Grid container spacing={2} alignItems="center">
+        <Grid item xs={6}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+            <TextField 
+              label="PAN Card Number" 
+              fullWidth 
+              value={formData.personalDetails.panNumber} 
+              onChange={(e) => handleChange(e, 'personalDetails', 'panNumber')} 
+              required 
+              error={!!errors.panNumber}
+              helperText={errors.panNumber}
+            />
+            <FieldTooltip title="Format: ABCDE1234F (5 letters, 4 numbers, 1 letter)" />
+          </Box>
+        </Grid>
+        <Grid item xs={6}>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography variant="body2" gutterBottom>
+              PAN Card File
+              <FieldTooltip title="Upload a scanned copy of PAN card (PDF/JPEG/PNG)" />
+            </Typography>
+            <input 
+              type="file" 
+              accept=".pdf,.jpg,.jpeg,.png"
+              onChange={(e) => handleFileUpload(e, 'personalDetails', 'panCardFile')} 
+            />
+          </Box>
+        </Grid>
+      </Grid>
+    </Grid>
+    
+    <Grid item xs={12}>
+      <Grid container spacing={2} alignItems="center">
+        <Grid item xs={6}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+            <TextField 
+              label="Aadhar Card Number" 
+              fullWidth 
+              value={formData.personalDetails.adharCardNumber} 
+              onChange={(e) => handleChange(e, 'personalDetails', 'adharCardNumber')} 
+              required 
+              error={!!errors.adharCardNumber}
+              helperText={errors.adharCardNumber}
+            />
+            <FieldTooltip title="Format: 12 digits (e.g., 123456789012)" />
+          </Box>
+        </Grid>
+        <Grid item xs={6}>
+          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+            <Typography variant="body2" gutterBottom>
+              Aadhar Card File
+              <FieldTooltip title="Upload a scanned copy of Aadhar card (PDF/JPEG/PNG)" />
+            </Typography>
+            <input 
+              type="file" 
+              accept=".pdf,.jpg,.jpeg,.png"
+              onChange={(e) => handleFileUpload(e, 'personalDetails', 'adharCardFile')} 
+            />
+          </Box>
+        </Grid>
+      </Grid>
+    </Grid>
+  </Grid>
+</Paper>
+
+      <Paper elevation={3} sx={{ padding: 3, marginBottom: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Contact Information
+          <FieldTooltip title="Current residential address and contact details" />
+        </Typography>
+        <Grid container spacing={2}>
           <Grid item xs={6}>
-            <Typography variant="body2" gutterBottom>PAN Card File</Typography>
-            <input type="file" onChange={(e) => handleFileUpload(e, 'personalDetails', 'panCardFile')} />
+            <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+              <TextField 
+                label="Phone Number" 
+                fullWidth 
+                value={formData.contactInfo.phoneNumber} 
+                onChange={(e) => handleChange(e, 'contactInfo', 'phoneNumber')} 
+                required 
+                error={!!errors.phoneNumber}
+                helperText={errors.phoneNumber}
+              />
+              <FieldTooltip title="10-digit mobile number without country code" />
+            </Box>
           </Grid>
-          <Grid item xs={6}><TextField label="Aadhar Card Number" fullWidth value={formData.personalDetails.adharCardNumber} onChange={(e) => handleChange(e, 'personalDetails', 'adharCardNumber')} required /></Grid>
           <Grid item xs={6}>
-            <Typography variant="body2" gutterBottom>Aadhar Card File</Typography>
-            <input type="file" onChange={(e) => handleFileUpload(e, 'personalDetails', 'adharCardFile')} />
+            <TextField 
+              label="House Number" 
+              fullWidth 
+              value={formData.contactInfo.houseNumber} 
+              onChange={(e) => handleChange(e, 'contactInfo', 'houseNumber')} 
+              required 
+              error={!!errors.houseNumber}
+              helperText={errors.houseNumber}
+            />
           </Grid>
-
-          
+          <Grid item xs={6}>
+            <TextField 
+              label="Street" 
+              fullWidth 
+              value={formData.contactInfo.street} 
+              onChange={(e) => handleChange(e, 'contactInfo', 'street')} 
+              required 
+              error={!!errors.street}
+              helperText={errors.street}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField 
+              label="Cross Street" 
+              fullWidth 
+              value={formData.contactInfo.crossStreet} 
+              onChange={(e) => handleChange(e, 'contactInfo', 'crossStreet')} 
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField 
+              label="Area" 
+              fullWidth 
+              value={formData.contactInfo.area} 
+              onChange={(e) => handleChange(e, 'contactInfo', 'area')} 
+              required 
+              error={!!errors.area}
+              helperText={errors.area}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField 
+              label="City" 
+              fullWidth 
+              value={formData.contactInfo.city} 
+              onChange={(e) => handleChange(e, 'contactInfo', 'city')} 
+              required 
+              error={!!errors.city}
+              helperText={errors.city}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+              <TextField 
+                label="Pin Code" 
+                fullWidth 
+                value={formData.contactInfo.pinCode} 
+                onChange={(e) => handleChange(e, 'contactInfo', 'pinCode')} 
+                required 
+                error={!!errors.pinCode}
+                helperText={errors.pinCode}
+              />
+              <FieldTooltip title="6-digit postal code" />
+            </Box>
+          </Grid>
         </Grid>
       </Paper>
 
       <Paper elevation={3} sx={{ padding: 3, marginBottom: 3 }}>
-        <Typography variant="h6" gutterBottom>Contact Information</Typography>
+        <Typography variant="h6" gutterBottom>
+          Emergency Contact
+          <FieldTooltip title="Contact details in case of emergency" />
+        </Typography>
         <Grid container spacing={2}>
-          <Grid item xs={6}><TextField label="Phone Number" fullWidth value={formData.contactInfo.phoneNumber} onChange={(e) => handleChange(e, 'contactInfo', 'phoneNumber')} required /></Grid>
-          <Grid item xs={6}><TextField label="House Number" fullWidth value={formData.contactInfo.houseNumber} onChange={(e) => handleChange(e, 'contactInfo', 'houseNumber')} required /></Grid>
-          <Grid item xs={6}><TextField label="Street" fullWidth value={formData.contactInfo.street} onChange={(e) => handleChange(e, 'contactInfo', 'street')} required /></Grid>
-          <Grid item xs={6}><TextField label="Cross Street" fullWidth value={formData.contactInfo.crossStreet} onChange={(e) => handleChange(e, 'contactInfo', 'crossStreet')} /></Grid>
-          <Grid item xs={6}><TextField label="Area" fullWidth value={formData.contactInfo.area} onChange={(e) => handleChange(e, 'contactInfo', 'area')} required /></Grid>
-          <Grid item xs={6}><TextField label="City" fullWidth value={formData.contactInfo.city} onChange={(e) => handleChange(e, 'contactInfo', 'city')} required /></Grid>
-          <Grid item xs={6}><TextField label="Pin Code" fullWidth value={formData.contactInfo.pinCode} onChange={(e) => handleChange(e, 'contactInfo', 'pinCode')} required /></Grid>
+          <Grid item xs={6}>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+              <TextField 
+                label="Mobile" 
+                fullWidth 
+                value={formData.emergencyContact.mobile} 
+                onChange={(e) => handleChange(e, 'emergencyContact', 'mobile')} 
+                required 
+                error={!!errors.emergencyMobile}
+                helperText={errors.emergencyMobile}
+              />
+              <FieldTooltip title="10-digit mobile number of emergency contact" />
+            </Box>
+          </Grid>
+          <Grid item xs={6}>
+            <TextField 
+              label="Landline" 
+              fullWidth 
+              value={formData.emergencyContact.landline} 
+              onChange={(e) => handleChange(e, 'emergencyContact', 'landline')} 
+            />
+          </Grid>
         </Grid>
       </Paper>
 
-
       <Paper elevation={3} sx={{ padding: 3, marginBottom: 3 }}>
-        <Typography variant="h6" gutterBottom>Emergency Contact</Typography>
+        <Typography variant="h6" gutterBottom>
+          Health Information
+          <FieldTooltip title="Insurance details to be filled by company" />
+        </Typography>
         <Grid container spacing={2}>
-          <Grid item xs={6}><TextField label="Mobile" fullWidth value={formData.emergencyContact.mobile} onChange={(e) => handleChange(e, 'emergencyContact', 'mobile')} required /></Grid>
-          <Grid item xs={6}><TextField label="Landline" fullWidth value={formData.emergencyContact.landline} onChange={(e) => handleChange(e, 'emergencyContact', 'landline')}  /></Grid>
+          <Grid item xs={6}>
+            <TextField 
+              label="Individual Insurance" 
+              fullWidth 
+              value={formData.insurance.individualInsurance} 
+              onChange={(e) => handleChange(e, 'insurance', 'individualInsurance')} 
+              required 
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField 
+              label="Group Insurance" 
+              fullWidth 
+              value={formData.insurance.groupInsurance} 
+              onChange={(e) => handleChange(e, 'insurance', 'groupInsurance')} 
+              required 
+            />
+          </Grid>
         </Grid>
       </Paper>
 
       <Paper elevation={3} sx={{ padding: 3, marginBottom: 3 }}>
-        <Typography variant="h6" gutterBottom>health Information(This details needs to be filled by company)</Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={6}><TextField label="Individual Insuarnce" fullWidth value={formData.insurance.individualInsurance} onChange={(e) => handleChange(e, 'insurance', 'individualInsurance')} required /></Grid>
-          <Grid item xs={6}><TextField label="Group Insuarnce" fullWidth value={formData.insurance.groupInsurance} onChange={(e) => handleChange(e, 'insurance', 'groupInsurance')} required /></Grid>
-        </Grid>
-      </Paper>
-
-
-
-
-
-
-
-
-
-      
-
-      <Paper elevation={3} sx={{ padding: 3, marginBottom: 3 }}>
-        <Typography variant="h6" gutterBottom>Nomination Details</Typography>
+        <Typography variant="h6" gutterBottom>
+          Nomination Details
+          <FieldTooltip title="Beneficiary information for company benefits" />
+        </Typography>
         {formData.nominations.map((nomination, index) => (
-          <Grid container spacing={3} key={index} alignItems="center">
+          <Grid container spacing={3} key={index} alignItems="center" sx={{ mb: 2 }}>
             <Grid item xs={4}>
-              <TextField fullWidth label="Name" value={nomination.name} onChange={handleArrayChange("nominations", index, "name")} required />
+              <TextField 
+                fullWidth 
+                label="Name" 
+                value={nomination.name} 
+                onChange={handleArrayChange("nominations", index, "name")} 
+                required 
+              />
             </Grid>
             <Grid item xs={4}>
               <FormControl fullWidth>
                 <InputLabel>Relationship</InputLabel>
-                <Select value={nomination.relationship} onChange={handleArrayChange("nominations", index, "relationship")} label="Relationship" required>
+                <Select 
+                  value={nomination.relationship} 
+                  onChange={handleArrayChange("nominations", index, "relationship")} 
+                  label="Relationship" 
+                  required
+                >
                   <MenuItem value="Spouse">Spouse</MenuItem>
                   <MenuItem value="Parent">Parent</MenuItem>
                   <MenuItem value="Child">Child</MenuItem>
+                  <MenuItem value="Sibling">Sibling</MenuItem>
+                  <MenuItem value="Other">Other</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
             <Grid item xs={4}>
-              <TextField fullWidth label="Age" value={nomination.age} onChange={handleArrayChange("nominations", index, "age")} required />
+              <TextField 
+                fullWidth 
+                label="Age" 
+                value={nomination.age} 
+                onChange={handleArrayChange("nominations", index, "age")} 
+                required 
+                type="number"
+                inputProps={{ min: 0, max: 120 }}
+              />
             </Grid>
           </Grid>
         ))}
-        <Button onClick={() => addEntry("nominations", { name: "", relationship: "", age: "" })} variant="outlined" sx={{ mt: 2 }}>Add Nominee</Button>
+        <Button 
+          onClick={() => addEntry("nominations", { name: "", relationship: "", age: "" })} 
+          variant="outlined" 
+          sx={{ mt: 2 }}
+        >
+          Add Nominee
+        </Button>
       </Paper>
 
       <Paper elevation={3} sx={{ padding: 3, marginBottom: 3 }}>
-        <Typography variant="h6" gutterBottom>Qualifications</Typography>
+        <Typography variant="h6" gutterBottom>
+          Qualifications
+          <FieldTooltip title="Educational qualifications with supporting documents" />
+        </Typography>
         {formData.qualifications.map((qualification, index) => (
-          <Grid container spacing={3} key={index} alignItems="center">
+          <Grid container spacing={3} key={index} alignItems="center" sx={{ mb: 2 }}>
             <Grid item xs={3}>
-              <TextField fullWidth label="Degree" value={qualification.degree} onChange={handleArrayChange("qualifications", index, "degree")} required />
+              <TextField 
+                fullWidth 
+                label="Degree" 
+                value={qualification.degree} 
+                onChange={handleArrayChange("qualifications", index, "degree")} 
+                required 
+              />
             </Grid>
             <Grid item xs={3}>
-              <TextField fullWidth label="Institution" value={qualification.institution} onChange={handleArrayChange("qualifications", index, "institution")} required />
+              <TextField 
+                fullWidth 
+                label="Institution" 
+                value={qualification.institution} 
+                onChange={handleArrayChange("qualifications", index, "institution")} 
+                required 
+              />
             </Grid>
             <Grid item xs={3}>
-              <TextField fullWidth label="Year" value={qualification.year} onChange={handleArrayChange("qualifications", index, "year")} required />
+              <TextField 
+                fullWidth 
+                label="Year" 
+                value={qualification.year} 
+                onChange={handleArrayChange("qualifications", index, "year")} 
+                required 
+                type="number"
+                inputProps={{ min: 1950, max: new Date().getFullYear() }}
+              />
             </Grid>
             <Grid item xs={3}>
-              <Typography variant="body2" gutterBottom>Qualification Document</Typography>
-              <input type="file" accept=".pdf,.jpg,.png" onChange={handleArrayFileUpload("qualifications", index, "file")} />
+              <Typography variant="body2" gutterBottom>
+                Qualification Document
+                <FieldTooltip title="Upload degree certificate/marksheet (PDF/JPEG/PNG)" />
+              </Typography>
+              <input 
+                type="file" 
+                accept=".pdf,.jpg,.jpeg,.png" 
+                onChange={handleArrayFileUpload("qualifications", index, "file")} 
+              />
             </Grid>
           </Grid>
         ))}
-        <Button onClick={() => addEntry("qualifications", { degree: "", institution: "", year: "", file: null })} variant="outlined" sx={{ mt: 2 }}>Add Qualification</Button>
+        <Button 
+          onClick={() => addEntry("qualifications", { degree: "", institution: "", year: "", file: null })} 
+          variant="outlined" 
+          sx={{ mt: 2 }}
+        >
+          Add Qualification
+        </Button>
       </Paper>
 
-      <Paper elevation={3} sx={{ padding: 3, marginBottom: 3 }}>
-        <Typography variant="h6" gutterBottom>Certifications</Typography>
-        {formData.certificates.map((cert, index) => (
-          <Grid container spacing={3} key={index} alignItems="center">
-            <Grid item xs={3}>
-              <TextField fullWidth label="Certificate Name" value={cert.name} onChange={handleArrayChange("certificates", index, "name")} required />
+     <Paper elevation={3} sx={{ padding: 3, marginBottom: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Certifications
+            <FieldTooltip title="Professional certifications with supporting documents" />
+          </Typography>
+          {formData.certificates.map((cert, index) => (
+            <Grid container spacing={3} key={index} alignItems="center" sx={{ mb: 2 }}>
+              <Grid item xs={3}>
+                <TextField 
+                  fullWidth 
+                  label="Name" 
+                  value={cert.name} 
+                  onChange={handleArrayChange("certificates", index, "name")} 
+                  required 
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <TextField 
+                  fullWidth 
+                  label="Issued By" 
+                  value={cert.issuedBy} 
+                  onChange={handleArrayChange("certificates", index, "issuedBy")} 
+                  required 
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <TextField 
+                  fullWidth 
+                  label="Date" 
+                  type="date"
+                  InputLabelProps={{ shrink: true }}
+                  value={cert.date} 
+                  onChange={handleArrayChange("certificates", index, "date")} 
+                  required 
+                />
+              </Grid>
+              <Grid item xs={3}>
+                <Typography variant="body2" gutterBottom>
+                  Certificate Document
+                  <FieldTooltip title="Upload certificate (PDF/JPEG/PNG)" />
+                </Typography>
+                <input 
+                  type="file" 
+                  accept=".pdf,.jpg,.jpeg,.png" 
+                  onChange={handleArrayFileUpload("certificates", index, "file")} 
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={3}>
-              <TextField fullWidth label="Issued By" value={cert.issuedBy} onChange={handleArrayChange("certificates", index, "issuedBy")} required />
-            </Grid>
-            <Grid item xs={3}>
-              <TextField fullWidth label="Date" type="date" InputLabelProps={{ shrink: true }} value={cert.date} onChange={handleArrayChange("certificates", index, "date")} required />
-            </Grid>
-            <Grid item xs={3}>
-              <Typography variant="body2" gutterBottom>Certificate Document</Typography>
-              <input type="file" accept=".pdf,.jpg,.png" onChange={handleArrayFileUpload("certificates", index, "file")} />
-            </Grid>
-          </Grid>
-        ))}
-        <Button onClick={() => addEntry("certificates", { name: "", issuedBy: "", date: "", file: null })} variant="outlined" sx={{ mt: 2 }}>Add Certificate</Button>
-      </Paper>
-      
-      <Grid container sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-        <Grid item>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-            size="large"
-        
-          >
-            {isEditMode ? 'Update' : 'Save'} Employee
-          </Button>
-        </Grid>
-        <Grid item>
+          ))}
           <Button 
+            onClick={() => addEntry("certificates", { name: "", issuedBy: "", date: "", file: null })} 
+            variant="outlined" 
+            sx={{ mt: 2 }}
+          >
+            Add Certificate
+          </Button>
+        </Paper>
+        
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Button 
+            type="submit" 
             variant="contained" 
             color="primary" 
-        
-            onClick={() => navigate("/addfinancial", { 
-              state: { 
-                employee_id: formData.employee_id,
-                isEdit: isEditMode
-              } 
-            })}
+            onClick={handleSubmit}
+            size="large"
+            sx={{ px: 4, py: 1 }}
           >
-            Finance details
+            {isEditMode ? "Update Details" : "Save & Continue"}
           </Button>
-        </Grid>
-      </Grid>
-    </Box>
-  );
-};
-
-export default Addpersonal;
+        </Box>
+            </Box>
+          );
+        };
+        
+        export default Addpersonal;
